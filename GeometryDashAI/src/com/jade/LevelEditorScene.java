@@ -9,14 +9,21 @@ import com.util.Vector2;
 import java.awt.*;
 
 public class LevelEditorScene extends Scene {
-
+    static LevelEditorScene currentScene;
     public GameObject player;
     GameObject ground;
     public LevelEditorScene(String name)
     {
         super.Scene(name);
     }
-
+    public static LevelEditorScene getScene()
+    {
+        if(LevelEditorScene.currentScene == null)
+        {
+            LevelEditorScene.currentScene = new LevelEditorScene("Scene");
+        }
+        return  LevelEditorScene.currentScene;
+    }
     @Override
     public void init() {
         player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)));
@@ -30,12 +37,15 @@ public class LevelEditorScene extends Scene {
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
+        player.addComponent(new Rigidbody(new Vector2(30,0)));
+        player.addComponent(new BoxBounds(Constants.PLAYER_WIDTH,Constants.PLAYER_HEIGHT));
+        gameObject.add(player);
         ground = new GameObject("Ground",new Transform(
                 new Vector2(0,Constants.GROUND_Y)));
         ground.addComponent(new Ground());
-
-        addGameObject(player);
-        addGameObject(ground);
+        gameObject.add(ground);
+        renderer.submit(player);
+        renderer.submit(ground);
     }
 
     @Override
