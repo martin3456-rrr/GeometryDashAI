@@ -10,6 +10,6 @@ public class Constants {
     public static final int CAMERA_OFFSET_X = 300;
     public static final int CAMERA_OFFSET_Y = 325;
     public static final int CAMERA_OFFSET_GRAOUND_Y = 150;
-    public static final float GRAVITY = 200;
-    public static final float TERMINAL_VELOCITY = 600;
+    public static final float GRAVITY = 2850;
+    public static final float TERMINAL_VELOCITY = 1900;
 }

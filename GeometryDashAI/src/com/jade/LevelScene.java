@@ -1,20 +1,20 @@
 package com.jade;
 
 import com.Component.*;
-import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
 import com.util.Constants;
 import com.util.Vector2;
 
 import java.awt.*;
 
-public class LevelEditorScene extends Scene {
+public class LevelScene extends Scene{
+    static LevelScene currentScene;
     public GameObject player;
-    GameObject ground;
-    public LevelEditorScene(String name)
+    public LevelScene(String name)
     {
         super.Scene(name);
     }
+
     @Override
     public void init() {
         player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)));
@@ -28,6 +28,9 @@ public class LevelEditorScene extends Scene {
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
+        player.addComponent(new Rigidbody(new Vector2(395,0)));
+        player.addComponent(new BoxBounds(Constants.PLAYER_WIDTH,Constants.PLAYER_HEIGHT));
+        GameObject ground;
         ground = new GameObject("Ground",new Transform(
                 new Vector2(0,Constants.GROUND_Y)));
         ground.addComponent(new Ground());
@@ -57,8 +60,8 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void draw(Graphics2D g2) {
-     g2.setColor(new Color(0.13f,0.1f,0.8f));
-     g2.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
-     renderer.render(g2);
+        g2.setColor(new Color(0.13f,0.1f,0.8f));
+        g2.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
+        renderer.render(g2);
     }
 }

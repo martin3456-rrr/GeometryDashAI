@@ -1,8 +1,8 @@
 package com.Component;
 
+import com.jade.*;
 import com.jade.Component;
-import com.jade.GameObject;
-import com.jade.LevelEditorScene;
+import com.jade.Window;
 import com.util.Constants;
 
 import java.awt.*;
@@ -11,11 +11,18 @@ public class Ground extends Component {
     @Override
     public void update(double dt)
     {
-        GameObject player = LevelEditorScene.getScene().player;
-        if(player.transform.position.y + player.getComponent(BoxBounds.class).height >
-        gameObject.transform.position.y)
+        if(Window.getWindow().isInEditor) {
+            LevelScene scene = (LevelScene) Window.getWindow().getCurrentScene();
+            GameObject player = scene.player;
+            if (player.transform.position.y + player.getComponent(BoxBounds.class).height >
+                    gameObject.transform.position.y) {
+                player.transform.position.y = gameObject.transform.position.y - player.getComponent(BoxBounds.class).height;
+            }
+            gameObject.transform.position.x = scene.camera.position.x - 10;
+        }
+        else
         {
-            player.transform.position.y = gameObject.transform.position.y - player.getComponent(BoxBounds.class).height;
+            gameObject.transform.position.x = Window.getWindow().getCurrentScene().camera.position.x - 10;
         }
     }
     @Override
