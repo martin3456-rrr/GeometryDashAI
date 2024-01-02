@@ -37,7 +37,7 @@ public class LevelEditorScene extends Scene {
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
-        player.addComponent(new Rigidbody(new Vector2(30,0)));
+        player.addComponent(new Rigidbody(new Vector2(0,0)));
         player.addComponent(new BoxBounds(Constants.PLAYER_WIDTH,Constants.PLAYER_HEIGHT));
         gameObject.add(player);
         ground = new GameObject("Ground",new Transform(
