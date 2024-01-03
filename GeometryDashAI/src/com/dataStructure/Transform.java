@@ -11,7 +11,7 @@ public class Transform {
     public Transform(Vector2 position)
     {
         this.position=position;
-        this.scale = new Vector2(1f,1f);
+        this.scale = new Vector2(1.0f,1.0f);
         this.rotation=0.0f;
     }
     @Override

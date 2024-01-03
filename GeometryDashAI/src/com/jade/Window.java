@@ -9,7 +9,7 @@ import java.awt.*;
 public class Window extends JFrame implements Runnable {
    public ML MouseListener ;
    public KL keyLister;
-   public boolean isInEditor = true;
+   public boolean isInEditor = false;
 
     private static Window window = null;
     private boolean isRunning = true;
@@ -32,7 +32,7 @@ public class Window extends JFrame implements Runnable {
     }
     public void init()
     {
-       changeScene(1);
+       changeScene(0);
     }
     public Scene getCurrentScene()
     {
@@ -43,12 +43,14 @@ public class Window extends JFrame implements Runnable {
         switch(scene)
         {
             case 0:
-                isInEditor = true;
+                isInEditor = false;
                 currentScene = new LevelEditorScene("Level Editor");
+                currentScene.init();
                 break;
             case 1:
-                isInEditor = false;
+                isInEditor = true;
                 currentScene = new LevelScene("Level");
+                currentScene.init();
                 break;
             default:
                 System.out.println("Do not know what this scene is.");

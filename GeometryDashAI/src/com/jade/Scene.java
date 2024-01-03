@@ -14,10 +14,9 @@ public abstract class Scene {
     public void Scene(String name)
     {
         this.name=name;
-        this.camera= new Camera(new Vector2());
+        this.camera= new Camera(new Vector2(1.0f,1.0f));
         this.gameObject = new ArrayList<>();
         this.renderer = new Renderer(this.camera);
-        init();
     }
     public void init()
     {

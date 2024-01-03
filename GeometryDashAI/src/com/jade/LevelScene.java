@@ -28,7 +28,7 @@ public class LevelScene extends Scene{
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
-        player.addComponent(new Rigidbody(new Vector2(395,0)));
+        player.addComponent(new Rigidbody(new Vector2(0,0)));
         player.addComponent(new BoxBounds(Constants.PLAYER_WIDTH,Constants.PLAYER_HEIGHT));
         GameObject ground;
         ground = new GameObject("Ground",new Transform(
