@@ -12,5 +12,6 @@ public abstract class Component<T> {
     {
        return;
     }
+    public abstract Component copy();
 
 }

@@ -40,6 +40,31 @@ public class GameObject {
          components.add(c);
          c.gameObject=this;
      }
+     public <T extends Component> void removeComponent(Class<T> componentClass)
+     {
+        for(Component c : components)
+        {
+            if(componentClass.isAssignableFrom(c.getClass()))
+            {
+                components.remove(c);
+                return;
+            }
+        }
+     }
+     public GameObject copy()
+     {
+         GameObject newGameObject = new GameObject("Generated",transform.copy());
+         for(Component c : components)
+         {
+             Component copy = c.copy();
+             if(copy!=null)
+             {
+                 newGameObject.addComponent(copy);
+             }
+
+         }
+         return newGameObject;
+     }
      public void update(double dt)
      {
          for(Component c : components)

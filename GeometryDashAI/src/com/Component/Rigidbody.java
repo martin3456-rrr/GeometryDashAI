@@ -4,8 +4,6 @@ import com.jade.Component;
 import com.util.Constants;
 import com.util.Vector2;
 
-import java.lang.module.Configuration;
-
 public class Rigidbody extends Component {
     public Vector2 velocity;
     public Rigidbody(Vector2 vel)
@@ -25,4 +23,8 @@ public class Rigidbody extends Component {
         }
     }
 
+    @Override
+    public Component copy() {
+        return null;
+    }
 }
