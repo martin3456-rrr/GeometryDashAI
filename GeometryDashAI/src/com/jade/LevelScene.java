@@ -1,6 +1,7 @@
 package com.jade;
 
 import com.Component.*;
+import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
 import com.util.Constants;
 import com.util.Vector2;
@@ -17,10 +18,11 @@ public class LevelScene extends Scene{
 
     @Override
     public void init() {
+        initAssetPool();
         player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)));
-        Spritesheet layerOne = new Spritesheet("assets/player/layerOne.png",42,42,2,13,13*5);
-        Spritesheet layerTwo = new Spritesheet("assets/player/layerTwo.png",42,42,2,13,13*5);
-        Spritesheet layerThree = new Spritesheet("assets/player/layerThree.png",42,42,2,13,13*5);
+        Spritesheet layerOne = AssertPool.getSpritesheet("assets/player/layerOne.png");
+        Spritesheet layerTwo = AssertPool.getSpritesheet("assets/player/layerTwo.png");
+        Spritesheet layerThree = AssertPool.getSpritesheet("assets/player/layerThree.png");
         Player playerComp = new Player(
                 layerOne.sprite.get(0),
                 layerTwo.sprite.get(0),
@@ -37,7 +39,13 @@ public class LevelScene extends Scene{
         addGameObject(player);
         addGameObject(ground);
     }
-
+    public void initAssetPool()
+    {
+        AssertPool.addSpritesheet("assets/player/layerOne.png",42,42,2,13,13*5);
+        AssertPool.addSpritesheet("assets/player/layerTwo.png",42,42,2,13,13*5);
+        AssertPool.addSpritesheet("assets/player/layerThree.png",42,42,2,13,13*5);
+        AssertPool.addSpritesheet("assets/groundSprites.png", 42, 42, 2, 6, 12);
+    }
     @Override
     public void update(double dt) {
         if(player.transform.position.x - camera.position.x>Constants.CAMERA_OFFSET_X)

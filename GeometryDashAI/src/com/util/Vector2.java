@@ -1,6 +1,8 @@
 package com.util;
 
-public class Vector2 {
+import com.File.Serialize;
+
+public class Vector2 extends Serialize {
     public float x,y;
     public Vector2(float x,float y)
     {
@@ -16,5 +18,14 @@ public class Vector2 {
     public Vector2 copy()
     {
         return new Vector2(this.x,this.y);
+    }
+
+    @Override
+    public String serialize(int tabSize) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(addFloatProperty("x",x,tabSize,true,true));
+        builder.append(addFloatProperty("y",y,tabSize,true,false));
+        return builder.toString();
+
     }
 }

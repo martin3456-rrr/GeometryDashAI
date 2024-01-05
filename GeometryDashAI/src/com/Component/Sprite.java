@@ -12,6 +12,8 @@ public class Sprite extends Component {
     public BufferedImage image;
     public String pictureFile;
     public int width,height;
+    public boolean isSubsprite = false;
+    public int row,column,index;
     public Sprite(String pictureFile)
     {
         this.pictureFile=pictureFile;
@@ -30,11 +32,22 @@ public class Sprite extends Component {
             System.exit(-1);
         }
     }
-    public Sprite(BufferedImage image)
+    public Sprite(BufferedImage image,String pictureFile)
     {
         this.image=image;
         this.width = image.getWidth();
         this.height = image.getHeight();
+        this.pictureFile = pictureFile;
+    }
+    public Sprite(BufferedImage image,int row,int column,int index,String pictureFile)
+    {
+        this.image=image;
+        this.width = image.getWidth();
+        this.height = image.getHeight();
+        this.column=column;
+        this.index=index;
+        this.isSubsprite = true;
+        this.pictureFile = pictureFile;
     }
     @Override
     public void draw(Graphics2D g2)
@@ -43,6 +56,32 @@ public class Sprite extends Component {
     }
     @Override
     public Component copy() {
-        return new Sprite(this.image);
+        if(!isSubsprite)
+        {
+            return new Sprite(this.image,pictureFile);
+        }
+        else
+        {
+            return  new Sprite(this.image,this.row,this.column,this.index,pictureFile);
+        }
+    }
+    @Override
+    public String serialize(int tabSize) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(beginObjectProperty("Sprite",tabSize));
+        builder.append(addBooleanProperty("isSubsprite",isSubsprite,tabSize+1,true,true));
+        if(isSubsprite)
+        {
+            builder.append(addStringProperty("FilePath",pictureFile,tabSize+1,true,true));
+            builder.append(addIntProperty("row",row,tabSize+1,true,true));
+            builder.append(addIntProperty("column",column,tabSize+1,true,true));
+            builder.append(addIntProperty("index",index,tabSize+1,true,true));
+            builder.append(closeObjectProperty(tabSize));
+
+            return builder.toString();
+        }
+        builder.append(addStringProperty("FilePath",pictureFile,tabSize+1,true,false));
+        builder.append(closeObjectProperty(tabSize));
+        return builder.toString();
     }
 }

@@ -27,7 +27,8 @@ public class Spritesheet {
                 int imgX = (column*tileWidth)+(column*spacing);
                 int imgY = (row*tileHeight)+(row*spacing);
 
-                sprite.add(new Sprite(parent.image.getSubimage(imgX,imgY,tileWidth,tileHeight)));
+                sprite.add(new Sprite(parent.image.getSubimage(imgX,imgY,tileWidth,tileHeight),
+                        row,column,count,pictureFile));
                 count++;
                 if(count>size-1)
                 {

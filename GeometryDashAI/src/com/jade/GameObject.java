@@ -1,15 +1,17 @@
 package com.jade;
 
+import com.File.Serialize;
 import com.dataStructure.Transform;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameObject {
+public class GameObject extends Serialize {
      private List<Component> components;
      private String name;
      public Transform transform;
+     private boolean serializable = true;
 
      public GameObject(String name, Transform transform)
      {
@@ -34,6 +36,10 @@ public class GameObject {
            }
        }
        return null;
+     }
+     public List<Component> getAllComponents()
+     {
+            return this.components;
      }
      public void addComponent(Component c)
      {
@@ -72,6 +78,10 @@ public class GameObject {
              c.update(dt);
          }
      }
+     public void setNonserializable()
+     {
+         serializable = false;
+     }
      public void draw(Graphics2D g2)
      {
          for(Component c : components)
@@ -80,4 +90,52 @@ public class GameObject {
          }
      }
 
+    @Override
+    public String serialize(int tabSize) {
+         if(!serializable) return "";
+        StringBuilder builder = new StringBuilder();
+        //GameObject
+        builder.append(beginObjectProperty("GameObject",tabSize));
+        //Transform
+        builder.append(transform.serialize(tabSize+1));
+        builder.append(addEding(true,true));
+
+        //Name
+        if(components.size()>0)
+        {
+            builder.append(addStringProperty("Name",name,tabSize+1,true,true));
+            builder.append(beginObjectProperty("Components",tabSize+1));
+
+        }
+        else
+        {
+            builder.append(addStringProperty("Name",name,tabSize+1,true,false));
+        }
+        int i=0;
+        for(Component c : components)
+        {
+            String str = c.serialize(tabSize+2);
+            if(str.compareTo("")!=0)
+            {
+                builder.append(str);
+                if(i!=components.size() - 1)
+                {
+                    builder.append(addEding(true,true));
+                }
+                else
+                {
+                    builder.append(addEding(true,false));
+                }
+            }
+            i++;
+        }
+        if(components.size()>0)
+        {
+            builder.append(closeObjectProperty(tabSize+1));
+        }
+        builder.append(addEding(true,false));
+        builder.append(closeObjectProperty(tabSize));
+
+        return builder.toString();
+     }
 }
