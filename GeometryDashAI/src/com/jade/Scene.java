@@ -26,6 +26,10 @@ public abstract class Scene {
     {
         gameObject.add(g);
         renderer.submit(g);
+        for(Component c : g.getAllComponents())
+        {
+            c.start();
+        }
     }
     public abstract  void update(double dt);
     public abstract void draw(Graphics2D g2);

@@ -35,6 +35,10 @@ public class GameObject {
        }
        return null;
      }
+     public List<Component> getAllComponents()
+     {
+            return this.components;
+     }
      public void addComponent(Component c)
      {
          components.add(c);
