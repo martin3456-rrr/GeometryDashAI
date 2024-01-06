@@ -44,6 +44,7 @@ public class Sprite extends Component {
         this.image=image;
         this.width = image.getWidth();
         this.height = image.getHeight();
+        this.row=row;
         this.column=column;
         this.index=index;
         this.isSubsprite = true;
@@ -62,7 +63,7 @@ public class Sprite extends Component {
         }
         else
         {
-            return  new Sprite(this.image,this.row,this.column,this.index,pictureFile);
+            return new Sprite(this.image,this.row,this.column,this.index,pictureFile);
         }
     }
     @Override
