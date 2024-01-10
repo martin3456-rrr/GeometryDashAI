@@ -1,5 +1,6 @@
 package com.dataStructure;
 
+import com.File.Parser;
 import com.File.Serialize;
 import com.util.Vector2;
 
@@ -48,5 +49,29 @@ public class Transform extends Serialize {
         builder.append(closeObjectProperty(tabSize));
 
         return builder.toString();
+    }
+    public static Transform deserialize()
+    {
+        Parser.consumeBeginObjectProperty("Transform");
+        Parser.consumeBeginObjectProperty("Position");
+
+        Vector2 position = Vector2.deserialize();
+        Parser.consumeEndObjectProperty();
+
+        Parser.consume(',');
+        Parser.consumeBeginObjectProperty("Scale");
+        Vector2 scale = Vector2.deserialize();
+        Parser.consumeEndObjectProperty();
+
+        Parser.consume(',');
+
+        float rotation = Parser.consumeFloatProperty("rotation");
+        Parser.consumeEndObjectProperty();
+
+        Transform t = new Transform(position);
+        t.scale = scale;
+        t.rotation = rotation;
+
+        return t;
     }
 }
