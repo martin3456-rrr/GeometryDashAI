@@ -1,5 +1,6 @@
 package com.jade;
 
+import com.File.Parser;
 import com.File.Serialize;
 import com.dataStructure.Transform;
 
@@ -12,6 +13,8 @@ public class GameObject extends Serialize {
      private String name;
      public Transform transform;
      private boolean serializable = true;
+
+     public boolean isUI = false;
 
      public GameObject(String name, Transform transform)
      {
@@ -137,5 +140,36 @@ public class GameObject extends Serialize {
         builder.append(closeObjectProperty(tabSize));
 
         return builder.toString();
+     }
+     public static GameObject deserialize()
+     {
+         Parser.consumeBeginObjectProperty("GameObject");
+
+         Transform transform = Transform.deserialize();
+         Parser.consume(',');
+         String name = Parser.consumeStringProperty("Name");
+
+         GameObject go = new GameObject(name,transform);
+
+         if(Parser.peek()==',')
+         {
+             Parser.consume(',');
+             Parser.consumeBeginObjectProperty("Components");
+             go.addComponent(Parser.parseComponent());
+
+             while(Parser.peek() == ',')
+             {
+                 Parser.consume(',');
+                 go.addComponent(Parser.parseComponent());
+             }
+             Parser.consumeEndObjectProperty();
+         }
+         Parser.consumeEndObjectProperty();
+
+         return go;
+     }
+     public void setUI(boolean val)
+     {
+         this.isUI = val;
      }
 }

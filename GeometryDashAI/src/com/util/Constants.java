@@ -1,12 +1,16 @@
 package com.util;
 
+import java.awt.*;
+
 public class Constants {
     public static final int SCREEN_WIDTH = 1280;
     public static final int SCREEN_HEIGHT = 720;
     public static final String SCREEN_TITLE = "Geometry Dash";
     public static final int PLAYER_WIDTH = 42;
     public static final int PLAYER_HEIGHT = 42;
-    public static final int GROUND_Y = 700;
+    public static final float JUMP_FORCE = -650;
+    public static final float PLAYER_SPEED = 395;
+    public static final int GROUND_Y = 714;
     public static final int CAMERA_OFFSET_X = 300;
     public static final int CAMERA_OFFSET_Y = 300;
     public static final int CAMERA_OFFSET_GRAOUND_Y = 150;
@@ -20,6 +24,9 @@ public class Constants {
     public static final int BUTTON_SPRACING_VT = 5;
     public static final int BUTTON_WIDTH = 60;
     public static final int BUTTON_HEIGHT = 60;
-
+    public static final Color BG_COLOR = new Color(15.0f/255.0f,
+            98.0f/255.0f,212.0f/255.0f,1.0f);
+    public static final Color GROUND_COLOR = new Color(28.0f/255.0f,
+            70.0f/255.0f,148.0f/255.0f,1.0f);
 
 }

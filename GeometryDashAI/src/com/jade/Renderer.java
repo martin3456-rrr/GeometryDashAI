@@ -25,13 +25,19 @@ public class Renderer {
     {
         for(GameObject g : gameObjects)
         {
-            Transform oldTransform = new Transform(g.transform.position);
-            oldTransform.rotation = g.transform.rotation;
-            oldTransform.scale = new Vector2(g.transform.scale.x,g.transform.scale.y);
+            if(g.isUI)
+            {
+                g.draw(g2);
+            }
+            else {
+                Transform oldTransform = new Transform(g.transform.position);
+                oldTransform.rotation = g.transform.rotation;
+                oldTransform.scale = new Vector2(g.transform.scale.x, g.transform.scale.y);
 
-            g.transform.position = new Vector2(g.transform.position.x - camera.position.x,g.transform.position.y - camera.position.y);
-            g.draw(g2);
-            g.transform = oldTransform;
+                g.transform.position = new Vector2(g.transform.position.x - camera.position.x, g.transform.position.y - camera.position.y);
+                g.draw(g2);
+                g.transform = oldTransform;
+            }
         }
     }
 }

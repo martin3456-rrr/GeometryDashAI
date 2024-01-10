@@ -1,6 +1,7 @@
 package com.jade;
 
 import com.Component.*;
+import com.File.Parser;
 import com.UI.MainContainer;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
@@ -82,6 +83,25 @@ public class LevelEditorScene extends Scene {
         if(Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_F1))
         {
             export("Test");
+        }
+        else if(Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_F2))
+        {
+            importLevel("Test");
+        }
+        else if(Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_F3))
+        {
+            Window.getWindow().changeScene(1);
+        }
+    }
+    private void importLevel(String filename)
+    {
+        Parser.openFile(filename);
+
+        GameObject go = Parser.parseGameObject();
+        while(go!=null)
+        {
+            addGameObject(go);
+            go = Parser.parseGameObject();
         }
     }
     private void export(String filename)

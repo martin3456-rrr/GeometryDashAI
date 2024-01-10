@@ -4,7 +4,7 @@ public abstract class Serialize {
     public abstract String serialize(int tabSize);
     public String addStringProperty(String name,String value,int tabSize,boolean newline,boolean comma)
     {
-        return addTabs(tabSize) + "\"" + name + "\": "+"\""+value+"\""+addEding(newline,comma);
+        return addTabs(tabSize) + "\"" + name + " \": " + "\"" + value +"\""+addEding(newline,comma);
     }
     public String addIntProperty(String name,int value,int tabSize,boolean newline,boolean comma)
     {
