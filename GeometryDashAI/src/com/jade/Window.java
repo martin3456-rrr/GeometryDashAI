@@ -66,6 +66,18 @@ public class Window extends JFrame implements Runnable {
       }
       return Window.window;
     }
+    public static Scene getScene()
+    {
+        return getWindow().getCurrentScene();
+    }
+    public static ML mouseListener()
+    {
+        return getWindow().MouseListener;
+    }
+    public static KL keyListener()
+    {
+        return getWindow().keyLister;
+    }
     public void update(double dt)
     {
         currentScene.update(dt);

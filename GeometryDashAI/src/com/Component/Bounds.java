@@ -2,6 +2,7 @@ package com.Component;
 
 import com.jade.Component;
 import com.jade.GameObject;
+import com.util.Vector2;
 
 enum BounsType
 {
@@ -10,8 +11,10 @@ enum BounsType
 }
 public abstract class Bounds extends Component {
     public BounsType type;
+    public boolean isSelected;
     abstract public float getWidth();
     abstract public float getHeight();
+    abstract public boolean raycast(Vector2 position);
 
     public static boolean checkCollision(Bounds b1,Bounds b2)
     {
@@ -36,6 +39,10 @@ public abstract class Bounds extends Component {
         {
             BoxBounds box = (BoxBounds)b;
             box.resolveCollision(plr);
+        }
+        else if(b.type == BounsType.Triangle)
+        {
+            plr.getComponent(Player.class).die();
         }
     }
 }

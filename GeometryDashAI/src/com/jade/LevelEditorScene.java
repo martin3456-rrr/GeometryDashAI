@@ -36,7 +36,7 @@ public class LevelEditorScene extends Scene {
         editingButtons.start();
 
         mouseCursor = new GameObject("Mouse Cursor",new Transform(new Vector2()),10);
-        mouseCursor.addComponent(new SnapToGrid(Constants.TILE_WIDTH,Constants.TILE_HEIGHT));
+        mouseCursor.addComponent(new LevelEditorControls(Constants.TILE_WIDTH,Constants.TILE_HEIGHT));
 
         player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)),0);
         Spritesheet layerOne = AssertPool.getSpritesheet("assets/player/layerOne.png");
@@ -132,6 +132,13 @@ public class LevelEditorScene extends Scene {
         else if(Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_F3))
         {
             Window.getWindow().changeScene(1);
+        }
+        if(objsRemove.size() > 0) {
+            for (GameObject go : objsRemove) {
+                gameObject.remove(go);
+                renderer.gameObjects.get(go.zIndex).remove(go);
+            }
+            objsRemove.clear();
         }
     }
     private void importLevel(String filename)

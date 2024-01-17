@@ -8,7 +8,7 @@ public abstract class Serialize {
     }
     public String addIntProperty(String name,int value,int tabSize,boolean newline,boolean comma)
     {
-        return addTabs(tabSize) + "\""+name+"\": "+value + addEding(newline,comma);
+        return addTabs(tabSize) + "\""+name+"\" :"+ value + addEding(newline,comma);
     }
     public String addFloatProperty(String name,float value,int tabSize,boolean newline,boolean comma)
     {

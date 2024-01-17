@@ -64,7 +64,6 @@ public class Transform extends Serialize {
         Parser.consumeEndObjectProperty();
 
         Parser.consume(',');
-
         float rotation = Parser.consumeFloatProperty("rotation");
         Parser.consumeEndObjectProperty();
 
