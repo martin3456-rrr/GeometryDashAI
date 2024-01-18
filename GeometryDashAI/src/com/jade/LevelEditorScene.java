@@ -143,6 +143,18 @@ public class LevelEditorScene extends Scene {
     }
     private void importLevel(String filename)
     {
+        for(GameObject go : gameObject)
+        {
+            if(go.serializable)
+            {
+                objsRemove.add(go);
+            }
+        }
+        for(GameObject go :objsRemove)
+        {
+            renderer.gameObjects.remove(go.zIndex, go);
+            gameObject.remove(go);
+        }
         Parser.openFile(filename);
 
         GameObject go = Parser.parseGameObject();

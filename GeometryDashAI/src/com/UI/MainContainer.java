@@ -1,9 +1,6 @@
 package com.UI;
 
-import com.Component.BoxBounds;
-import com.Component.Sprite;
-import com.Component.Spritesheet;
-import com.Component.TriangleBounds;
+import com.Component.*;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
 import com.jade.Component;
@@ -98,7 +95,9 @@ public class MainContainer extends Component {
 
                 if(i==0)
                 {
-                    obj.addComponent(new BoxBounds(Constants.TILE_WIDTH,16));
+                    BoxBounds boxBounds = new BoxBounds(Constants.TILE_WIDTH,16);
+                    boxBounds.yBuffer = 42-16;
+                    obj.addComponent(boxBounds);
                 }
                 this.tabMaps.get(tabs.get(1)).add(obj);
             }
@@ -113,7 +112,6 @@ public class MainContainer extends Component {
                 obj.addComponent(spikeSprites.sprite.get(i));
                 obj.addComponent(menuItem);
 
-                // TODO:: Add triangleBounds component here
                 obj.addComponent(new TriangleBounds(42,42));
                 this.tabMaps.get(this.tabs.get(3)).add(obj);
             }
@@ -142,10 +140,17 @@ public class MainContainer extends Component {
                 obj.addComponent(menuItem);
                 obj.addComponent(portalSprites.sprite.get(i));
 
-                obj.addComponent(new BoxBounds(44,85));
+                obj.addComponent(new BoxBounds(44,85,true));
 
                 // TODO:: Create portalComponent here
-
+                if(i==0)
+                {
+                    obj.addComponent(new Portal(PlayerState.FLYING));
+                }
+                else
+                {
+                    obj.addComponent(new Portal(PlayerState.NORMAL));
+                }
                 this.tabMaps.get(tabs.get(5)).add(obj);
             }
 

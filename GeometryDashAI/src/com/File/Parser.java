@@ -1,6 +1,7 @@
 package com.File;
 
 import com.Component.BoxBounds;
+import com.Component.Portal;
 import com.Component.Sprite;
 import com.Component.TriangleBounds;
 import com.jade.Component;
@@ -23,6 +24,8 @@ public class Parser {
         if(!tmp.exists()) {
             return;
         }
+        offset = 0;
+        line = 1;
         try {
             ZipFile zipFile = new ZipFile("levels/" + filename + ".zip");
             ZipEntry jsonFile = zipFile.getEntry(filename + ".json");
@@ -121,12 +124,14 @@ public class Parser {
        char c;
        StringBuilder builder = new StringBuilder();
        consume('"');
+
        while(!atEnd() && peek()!='"')
        {
            c = advance();
            builder.append(c);
        }
        consume('"');
+
        return builder.toString();
    }
    public static boolean parseBoolean()
@@ -176,6 +181,8 @@ public class Parser {
                return BoxBounds.deserialize();
            case "TriangleBounds":
                return TriangleBounds.deserialize();
+           case "Portal":
+               return Portal.deserialize();
            default:
                System.out.println("Could not find component '"+ componentTitle + "' at line: "+Parser.line);
                System.exit(-1);

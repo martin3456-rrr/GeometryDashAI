@@ -12,7 +12,7 @@ public class GameObject extends Serialize {
      private List<Component> components;
      private String name;
      public Transform transform;
-     private boolean serializable = true;
+     public boolean serializable = true;
      public boolean isUI = false;
      public int zIndex;
 

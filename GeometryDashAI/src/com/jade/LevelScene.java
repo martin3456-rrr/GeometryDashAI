@@ -79,6 +79,7 @@ public class LevelScene extends Scene{
         AssertPool.addSpritesheet("assets/player/layerTwo.png",42,42,2,13,13*5);
         AssertPool.addSpritesheet("assets/player/layerThree.png",42,42,2,13,13*5);
         AssertPool.addSpritesheet("assets/groundSprites.png", 42, 42, 2, 6, 12);
+        AssertPool.getSprite("assets/player/spaceship.png");
     }
     @Override
     public void update(double dt) {
@@ -86,10 +87,7 @@ public class LevelScene extends Scene{
         {
             camera.position.x = player.transform.position.x - Constants.CAMERA_OFFSET_X;
         }
-        if(player.transform.position.y - camera.position.y>Constants.CAMERA_OFFSET_Y)
-        {
-            camera.position.y = player.transform.position.y - Constants.CAMERA_OFFSET_Y;
-        }
+        camera.position.y = player.transform.position.y - Constants.CAMERA_OFFSET_Y;
         if(camera.position.y >Constants.CAMERA_OFFSET_GRAOUND_Y)
         {
             camera.position.y = Constants.CAMERA_OFFSET_GRAOUND_Y;

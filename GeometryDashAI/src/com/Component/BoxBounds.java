@@ -13,8 +13,19 @@ public class BoxBounds extends Bounds {
     public float width,height;
     public float halfWidth,halfHeight;
     public Vector2 center = new Vector2();
+    public boolean isTrigger = false;
+    public float xBuffer = 0.0f;
+    public float yBuffer = 0.0f;
     public float enclosingRadius;
     public BoxBounds(float width, float height)
+    {
+        init(width,height,false);
+    }
+    public BoxBounds(float width,float height, boolean isTrigger)
+    {
+        init(width,height,isTrigger);
+    }
+    public void init(float width,float height, boolean isTrigger)
     {
         this.width=width;
         this.height=height;
@@ -22,6 +33,7 @@ public class BoxBounds extends Bounds {
         this.halfHeight=this.height/2.0f;
         this.enclosingRadius = (float)Math.sqrt((this.halfWidth*this.halfWidth)+ this.halfHeight*this.halfHeight);
         this.type = BounsType.Box;
+        this.isTrigger = isTrigger;
     }
     @Override
     public void start()
@@ -30,8 +42,8 @@ public class BoxBounds extends Bounds {
     }
     public void calculateCenter()
     {
-        this.center.x = this.gameObject.transform.position.x+this.halfWidth;
-        this.center.y = this.gameObject.transform.position.y+this.halfHeight;
+        this.center.x = this.gameObject.transform.position.x+this.halfWidth+this.xBuffer;
+        this.center.y = this.gameObject.transform.position.y+this.halfHeight+this.yBuffer;
 
     }
     @Override
@@ -59,6 +71,8 @@ public class BoxBounds extends Bounds {
     }
     public void resolveCollision(GameObject player)
     {
+        if(isTrigger) return;
+
         BoxBounds playerBounds = player.getComponent(BoxBounds.class);
         playerBounds.calculateCenter();
         this.calculateCenter();
@@ -77,7 +91,7 @@ public class BoxBounds extends Bounds {
             if(dy>0)
             {
                //Collision on the top of the player
-                player.transform.position.y = gameObject.transform.position.y - playerBounds.getHeight();
+                player.transform.position.y = gameObject.transform.position.y - playerBounds.getHeight()+yBuffer;
                 player.getComponent(Rigidbody.class).velocity.y = 0;
                 player.getComponent(Player.class).onGround = true;
             }
@@ -93,7 +107,7 @@ public class BoxBounds extends Bounds {
             //Collision on the left or right of the player
             if(dx<0 && dy <=0.3)
             {
-                player.transform.position.y = gameObject.transform.position.y - playerBounds.getHeight();
+                player.transform.position.y = gameObject.transform.position.y - playerBounds.getHeight()+yBuffer;
                 player.getComponent(Rigidbody.class).velocity.y = 0;
                 player.getComponent(Player.class).onGround = true;
             }
@@ -107,7 +121,10 @@ public class BoxBounds extends Bounds {
     }
     @Override
     public Component copy() {
-        return new BoxBounds(width,height);
+        BoxBounds bounds = new BoxBounds(width,height,isTrigger);
+        bounds.xBuffer = xBuffer;
+        bounds.yBuffer = yBuffer;
+        return bounds;
     }
 
     @Override
@@ -116,7 +133,10 @@ public class BoxBounds extends Bounds {
 
        builder.append(beginObjectProperty("BoxBounds",tabSize));
        builder.append(addFloatProperty("Width",this.width,tabSize+1,true,true));
-       builder.append(addFloatProperty("Height",this.height,tabSize+1,true,false));
+       builder.append(addFloatProperty("Height",this.height,tabSize+1,true,true));
+       builder.append(addFloatProperty("xBuffer",this.xBuffer,tabSize+1,true,true));
+       builder.append(addFloatProperty("yBuffer",this.yBuffer,tabSize+1,true,true));
+       builder.append(addBooleanProperty("isTrigger",this.isTrigger,tabSize+1,true,false));
        builder.append(closeObjectProperty(tabSize));
 
        return builder.toString();
@@ -126,9 +146,17 @@ public class BoxBounds extends Bounds {
         float width = Parser.consumeFloatProperty("Width");
         Parser.consume(',');
         float height = Parser.consumeFloatProperty("Height");
+        Parser.consume(',');
+        float xBuffer = Parser.consumeFloatProperty("xBuffer");
+        Parser.consume(',');
+        float yBuffer = Parser.consumeFloatProperty("yBuffer");
+        Parser.consume(',');
+        boolean isTrigger = Parser.consumeBooleanProperty("isTrigger");
         Parser.consumeEndObjectProperty();
-
-        return new BoxBounds(width,height);
+        BoxBounds bounds = new BoxBounds(width,height,isTrigger);
+        bounds.xBuffer = xBuffer;
+        bounds.yBuffer = yBuffer;
+        return bounds;
     }
     @Override
     public float getWidth() {
@@ -142,10 +170,10 @@ public class BoxBounds extends Bounds {
 
     @Override
     public boolean raycast(Vector2 position) {
-        return position.x > this.gameObject.transform.position.x &&
-                position.x < this.gameObject.transform.position.x + this.width &&
-                position.y > this.gameObject.transform.position.y &&
-                position.y < this.gameObject.transform.position.y + this.height;
+        return position.x > this.gameObject.transform.position.x + xBuffer &&
+                position.x < this.gameObject.transform.position.x + this.width + xBuffer &&
+                position.y > this.gameObject.transform.position.y + yBuffer &&
+                position.y < this.gameObject.transform.position.y + this.height + yBuffer;
     }
     @Override
     public void draw(Graphics2D g2)
@@ -155,8 +183,8 @@ public class BoxBounds extends Bounds {
             g2.setColor(Color.GREEN);
             g2.setStroke(Constants.THICK_LINE);
             g2.draw(new Rectangle2D.Float(
-                    this.gameObject.transform.position.x,
-                    this.gameObject.transform.position.y,
+                    this.gameObject.transform.position.x+xBuffer,
+                    this.gameObject.transform.position.y+yBuffer,
                     this.width,
                     this.height));
             g2.setStroke(Constants.LINE);
