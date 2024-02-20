@@ -13,9 +13,9 @@ public class Rigidbody extends Component {
     @Override
     public void update(double dt)
     {
-        gameObject.transform.position.y+=velocity.y*dt;
-        gameObject.transform.position.x+=velocity.x*dt;
-        velocity.y+= Constants.GRAVITY*dt;
+        gameObject.transform.position.y+= (float) (velocity.y*dt);
+        gameObject.transform.position.x+= (float) (velocity.x*dt);
+        velocity.y+= (float) (Constants.GRAVITY*dt);
 
         if(Math.abs(velocity.y)>Constants.TERMINAL_VELOCITY)
         {

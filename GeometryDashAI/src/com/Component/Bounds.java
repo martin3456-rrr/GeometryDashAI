@@ -27,9 +27,9 @@ public abstract class Bounds extends Component {
         {
             return TriangleBounds.checkCollision((BoxBounds)b1,(TriangleBounds)b2);
         }
-        else if(b1.type == BounsType.Triangle  && b2.type == BounsType.Box)
+        else if(b1.type == BounsType.Triangle && b2.type == BounsType.Box)
         {
-            return  TriangleBounds.checkCollision((BoxBounds)b2,(TriangleBounds)b1);
+            return TriangleBounds.checkCollision((BoxBounds)b2,(TriangleBounds)b1);
         }
         return false;
     }
@@ -37,7 +37,7 @@ public abstract class Bounds extends Component {
     {
         if(b.type == BounsType.Box)
         {
-            BoxBounds box = (BoxBounds)b;
+            BoxBounds box = (BoxBounds) b;
             box.resolveCollision(plr);
         }
         else if(b.type == BounsType.Triangle)

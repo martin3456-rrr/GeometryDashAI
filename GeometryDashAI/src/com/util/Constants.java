@@ -9,11 +9,12 @@ public class Constants {
     public static final int PLAYER_WIDTH = 42;
     public static final int PLAYER_HEIGHT = 42;
     public static final float JUMP_FORCE = -650;
+    public static final float FLY_FORCE = -350;
     public static final float PLAYER_SPEED = 395;
     public static final int GROUND_Y = 714;
     public static final int CAMERA_OFFSET_X = 300;
     public static final int CAMERA_OFFSET_Y = 300;
-    public static final int CAMERA_OFFSET_GRAOUND_Y = 150;
+    public static final int CAMERA_OFFSET_GROUND_Y = 150;
     public static final float GRAVITY = 2850;
     public static final float TERMINAL_VELOCITY = 1900;
     public static final int TILE_WIDTH = 42;
@@ -21,7 +22,7 @@ public class Constants {
     public static final int BUTTON_OFFSET_X = 400;
     public static final int BUTTON_OFFSET_Y = 560;
     public static final int BUTTON_SPACING_HZ = 10;
-    public static final int BUTTON_SPRACING_VT = 5;
+    public static final int BUTTON_SPACING_VT = 5;
     public static final int BUTTON_WIDTH = 60;
     public static final int BUTTON_HEIGHT = 60;
     public static final Color BG_COLOR = new Color(15.0f/255.0f,

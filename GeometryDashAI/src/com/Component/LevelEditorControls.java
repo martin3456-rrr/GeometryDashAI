@@ -52,7 +52,7 @@ public class LevelEditorControls extends Component { ;
     {
         mousePos.x += Window.getScene().camera.position.x;
         mousePos.y += Window.getScene().camera.position.y;
-        for(GameObject go :Window.getScene().getAllGameObjects())
+        for(GameObject go : Window.getScene().getAllGameObjects())
         {
             Bounds bounds = go.getComponent(Bounds.class);
             if(bounds != null && bounds.raycast(mousePos))
@@ -108,8 +108,8 @@ public class LevelEditorControls extends Component { ;
     @Override
     public void update(double dt)
     {
-        debounceLeft -= dt;
-        debounceKeyLeft -=dt;
+        debounceLeft -= (float) dt;
+        debounceKeyLeft -= (float) dt;
 
         if(!isEditing && this.gameObject.getComponent(Sprite.class)!=null)
         {
@@ -117,7 +117,7 @@ public class LevelEditorControls extends Component { ;
         }
         if(isEditing)
         {
-            if(selectedObjects.size()!=0)
+            if(!selectedObjects.isEmpty())
             {
                 clearSelected();
             }
@@ -144,6 +144,7 @@ public class LevelEditorControls extends Component { ;
         {
             wasDragged = false;
             clearSelected();
+            LevelEditorScene scene = (LevelEditorScene) Window.getScene();
             List<GameObject> objs = boxCast(dragX,dragY,dragWidth,dragHeight);
             for(GameObject go : objs)
             {
@@ -209,12 +210,12 @@ public class LevelEditorControls extends Component { ;
 
         if(debounceKeyLeft<=0 && Window.keyListener().IsKeyPressed(KeyEvent.VK_Q))
         {
-            rotationObjects(90);
+            rotationObjects(-90);
             debounceKeyLeft=debounceKey;
         }
         else if(debounceKeyLeft<=0 && Window.keyListener().IsKeyPressed(KeyEvent.VK_E))
         {
-            rotationObjects(-90);
+            rotationObjects(90);
             debounceKeyLeft=debounceKey;
         }
     }
@@ -255,7 +256,7 @@ public class LevelEditorControls extends Component { ;
             go.transform.position.x+=distance.x;
             go.transform.position.y+=distance.y;
             float gridX = (float)(Math.floor(go.transform.position.x/Constants.TILE_WIDTH) + 1) * Constants.TILE_WIDTH;
-            float gridY = (float)(Math.floor(go.transform.position.y/Constants.TILE_WIDTH) * Constants.TILE_WIDTH);
+            float gridY = (float)(Math.floor(go.transform.position.y/Constants.TILE_HEIGHT) * Constants.TILE_HEIGHT);
 
             if(go.transform.position.x < gridX + 1 && go.transform.position.x > gridX - 1)
             {
@@ -291,7 +292,7 @@ public class LevelEditorControls extends Component { ;
                 AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
                 g2.setComposite(ac);
                 g2.drawImage(sprite.image, (int) gameObject.transform.position.x, (int) gameObject.transform.position.y,
-                        (int) sprite.width, (int) sprite.height, null);
+                         sprite.width, sprite.height, null);
                 alpha = 1.0f;
                 ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
                 g2.setComposite(ac);

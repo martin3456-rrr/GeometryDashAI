@@ -44,17 +44,15 @@ public class MainContainer extends Component {
             GameObject obj = new GameObject("Tab",new Transform(new Vector2(x,y)),10);
             obj.setUI(true);
             obj.setNonserializable();
-            TabItem item = new TabItem(x,y,Constants.TILE_WIDTH,Constants.TILE_HEIGHT,currentTab,this);
+            TabItem item = new TabItem(x,y,Constants.TAB_WIDTH,Constants.TAB_HEIGHT,currentTab,this);
             obj.addComponent(item);
 
             this.tabs.add(obj);
             this.tabMaps.put(obj,new ArrayList<>());
             Window.getWindow().getCurrentScene().addGameObject(obj);
         }
-        this.hotTab = this.tabs.get(0);
+        this.hotTab = this.tabs.getFirst();
         this.hotTab.getComponent(TabItem.class).isSelected = true;
-
-
         addTabObject();
 
     }
@@ -71,7 +69,7 @@ public class MainContainer extends Component {
         {
             Sprite currentSprite  = groundSprites.sprite.get(i);
             int x = Constants.BUTTON_OFFSET_X + (currentSprite.column*Constants.BUTTON_WIDTH) + (currentSprite.column * Constants.BUTTON_SPACING_HZ);
-            int y = Constants.BUTTON_OFFSET_Y + (currentSprite.row * Constants.BUTTON_HEIGHT) + (currentSprite.row * Constants.BUTTON_SPRACING_VT);
+            int y = Constants.BUTTON_OFFSET_Y + (currentSprite.row * Constants.BUTTON_HEIGHT) + (currentSprite.row * Constants.BUTTON_SPACING_VT);
 
             //Add first tab container objs
             GameObject obj = new GameObject("Gen", new Transform(new Vector2(x,y)),10);
@@ -96,7 +94,7 @@ public class MainContainer extends Component {
                 if(i==0)
                 {
                     BoxBounds boxBounds = new BoxBounds(Constants.TILE_WIDTH,16);
-                    boxBounds.yBuffer = 42-16;
+                    boxBounds.yBuffer = 42 -16;
                     obj.addComponent(boxBounds);
                 }
                 this.tabMaps.get(tabs.get(1)).add(obj);
@@ -106,12 +104,11 @@ public class MainContainer extends Component {
             if(i < spikeSprites.sprite.size())
             {
                 obj = new GameObject("Gen",new Transform(new Vector2(x,y)),10);
-                obj.setNonserializable();
                 obj.setUI(true);
+                obj.setNonserializable();
                 menuItem = menuItem.copy();
                 obj.addComponent(spikeSprites.sprite.get(i));
                 obj.addComponent(menuItem);
-
                 obj.addComponent(new TriangleBounds(42,42));
                 this.tabMaps.get(this.tabs.get(3)).add(obj);
             }

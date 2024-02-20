@@ -19,13 +19,12 @@ public class LevelEditorScene extends Scene {
     public GameObject player;
     private GameObject ground;
     private Grid grid;
-    public CameraControls cameraControls;
+    private CameraControls cameraControls;
     public GameObject mouseCursor;
     private MainContainer editingButtons;
     public LevelEditorScene(String name)
     {
         super.Scene(name);
-
     }
     @Override
     public void init() {
@@ -38,18 +37,17 @@ public class LevelEditorScene extends Scene {
         mouseCursor = new GameObject("Mouse Cursor",new Transform(new Vector2()),10);
         mouseCursor.addComponent(new LevelEditorControls(Constants.TILE_WIDTH,Constants.TILE_HEIGHT));
 
-        player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)),0);
+        player = new GameObject("Some game object",new Transform(new Vector2(100.0f,300.0f)),0);
         Spritesheet layerOne = AssertPool.getSpritesheet("assets/player/layerOne.png");
         Spritesheet layerTwo = AssertPool.getSpritesheet("assets/player/layerTwo.png");
         Spritesheet layerThree = AssertPool.getSpritesheet("assets/player/layerThree.png");
         Player playerComp = new Player(
-                layerOne.sprite.get(0),
-                layerTwo.sprite.get(0),
-                layerThree.sprite.get(0),
+                layerOne.sprite.getFirst(),
+                layerTwo.sprite.getFirst(),
+                layerThree.sprite.getFirst(),
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
-
         player.setNonserializable();
         addGameObject(player);
 
@@ -93,7 +91,7 @@ public class LevelEditorScene extends Scene {
             ParallaxBackgrounds groundBg = new ParallaxBackgrounds("assets/grounds/ground01.png",
                     null,ground.getComponent(Ground.class),true);
             x = i*groundBg.sprite.width;
-            y = (int)ground.transform.position.y;
+            y = (int) ground.transform.position.y;
             GameObject groundGo = new GameObject("GroundBg",new Transform(new Vector2(x,y)),-9);
             groundGo.addComponent(groundBg);
             groundGo.setUI(true);
@@ -103,14 +101,12 @@ public class LevelEditorScene extends Scene {
             addGameObject(go);
             addGameObject(groundGo);
         }
-
     }
-
     @Override
     public void update(double dt) {
-        if(camera.position.y >Constants.CAMERA_OFFSET_GRAOUND_Y+70)
+        if(camera.position.y > Constants.CAMERA_OFFSET_GROUND_Y + 70)
         {
-            camera.position.y = Constants.CAMERA_OFFSET_GRAOUND_Y+70;
+            camera.position.y = Constants.CAMERA_OFFSET_GROUND_Y + 70;
         }
         for(GameObject g: gameObject)
         {
@@ -133,7 +129,7 @@ public class LevelEditorScene extends Scene {
         {
             Window.getWindow().changeScene(1);
         }
-        if(objsRemove.size() > 0) {
+        if(!objsRemove.isEmpty()) {
             for (GameObject go : objsRemove) {
                 gameObject.remove(go);
                 renderer.gameObjects.get(go.zIndex).remove(go);
@@ -150,7 +146,7 @@ public class LevelEditorScene extends Scene {
                 objsRemove.add(go);
             }
         }
-        for(GameObject go :objsRemove)
+        for(GameObject go : objsRemove)
         {
             renderer.gameObjects.remove(go.zIndex, go);
             gameObject.remove(go);

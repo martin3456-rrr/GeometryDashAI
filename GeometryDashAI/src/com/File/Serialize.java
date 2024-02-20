@@ -4,11 +4,11 @@ public abstract class Serialize {
     public abstract String serialize(int tabSize);
     public String addStringProperty(String name,String value,int tabSize,boolean newline,boolean comma)
     {
-        return addTabs(tabSize) + "\"" + name + "\": " + "\"" + value + "\"" +addEding(newline,comma);
+        return addTabs(tabSize) + "\"" + name + "\": " + "\"" + value + "\"" + addEding(newline, comma);
     }
     public String addIntProperty(String name,int value,int tabSize,boolean newline,boolean comma)
     {
-        return addTabs(tabSize) + "\""+name+"\" :"+ value + addEding(newline,comma);
+        return addTabs(tabSize) + "\"" + name + "\": " + value +addEding(newline, comma);
     }
     public String addFloatProperty(String name,float value,int tabSize,boolean newline,boolean comma)
     {
@@ -22,9 +22,10 @@ public abstract class Serialize {
     {
         return addTabs(tabSize) + "\""+name+"\": "+value + addEding(newline,comma);
     }
+
     public String beginObjectProperty(String name,int tabSize)
     {
-        return addTabs(tabSize) + "\"" + name + "\": {"+addEding(true,false);
+        return addTabs(tabSize) + "\"" + name + "\": {" +addEding(true,false);
     }
     public String closeObjectProperty(int tabSize)
     {

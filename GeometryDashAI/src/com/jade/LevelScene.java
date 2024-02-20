@@ -10,36 +10,34 @@ import com.util.Vector2;
 import java.awt.*;
 
 public class LevelScene extends Scene{
-    static LevelScene currentScene;
     public GameObject player;
     public BoxBounds playerBounds;
     public LevelScene(String name)
     {
         super.Scene(name);
     }
-
     @Override
     public void init() {
         initAssetPool();
-        player = new GameObject("Some game object",new Transform(new Vector2(500.0f,350.0f)),0);
+        player = new GameObject("Some game object",new Transform(new Vector2(100.0f,300.0f)),0);
+
         Spritesheet layerOne = AssertPool.getSpritesheet("assets/player/layerOne.png");
         Spritesheet layerTwo = AssertPool.getSpritesheet("assets/player/layerTwo.png");
         Spritesheet layerThree = AssertPool.getSpritesheet("assets/player/layerThree.png");
         Player playerComp = new Player(
-                layerOne.sprite.get(0),
-                layerTwo.sprite.get(0),
-                layerThree.sprite.get(0),
+                layerOne.sprite.getFirst(),
+                layerTwo.sprite.getFirst(),
+                layerThree.sprite.getFirst(),
                 Color.RED,
                 Color.GREEN);
         player.addComponent(playerComp);
         player.addComponent(new Rigidbody(new Vector2(Constants.PLAYER_SPEED,0)));
         playerBounds = new BoxBounds(Constants.TILE_WIDTH-2,Constants.TILE_HEIGHT-2);
         player.addComponent(playerBounds);
-
         renderer.submit(player);
-
         initBackgrounds();
         importLevel("Test");
+
     }
     public void initBackgrounds()
     {
@@ -67,11 +65,9 @@ public class LevelScene extends Scene{
             groundGo.addComponent(groundBg);
             groundGo.setUI(true);
             groundBgs[i] = groundGo;
-
             addGameObject(go);
             addGameObject(groundGo);
         }
-
     }
     public void initAssetPool()
     {
@@ -88,12 +84,13 @@ public class LevelScene extends Scene{
             camera.position.x = player.transform.position.x - Constants.CAMERA_OFFSET_X;
         }
         camera.position.y = player.transform.position.y - Constants.CAMERA_OFFSET_Y;
-        if(camera.position.y >Constants.CAMERA_OFFSET_GRAOUND_Y)
+        if(camera.position.y >Constants.CAMERA_OFFSET_GROUND_Y)
         {
-            camera.position.y = Constants.CAMERA_OFFSET_GRAOUND_Y;
+            camera.position.y = Constants.CAMERA_OFFSET_GROUND_Y;
         }
         player.update(dt);
         player.getComponent(Player.class).onGround = false;
+
         for(GameObject g: gameObject)
         {
             g.update(dt);
@@ -102,18 +99,18 @@ public class LevelScene extends Scene{
             {
                 if(BoxBounds.checkCollision(playerBounds,b))
                 {
-                   Bounds.resolveCollision(b,player);
+                    Bounds.resolveCollision(b,player);
                 }
             }
         }
+
+
     }
     private void importLevel(String filename)
     {
         Parser.openFile(filename);
-
         GameObject go = Parser.parseGameObject();
-        while(go!=null)
-        {
+        while (go != null) {
             addGameObject(go);
             go = Parser.parseGameObject();
         }
@@ -124,4 +121,5 @@ public class LevelScene extends Scene{
         g2.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
         renderer.render(g2);
     }
+
 }

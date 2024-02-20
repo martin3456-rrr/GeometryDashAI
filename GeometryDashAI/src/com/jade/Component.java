@@ -6,7 +6,7 @@ import java.awt.*;
 
 public abstract class Component<T> extends Serialize {
     public GameObject gameObject;
-    public  void update(double dt)
+    public void update(double dt)
     {
         return;
     }

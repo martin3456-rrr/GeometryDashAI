@@ -37,7 +37,7 @@ public class ParallaxBackgrounds extends Component {
     {
         if(backgrounds==null) return;
         this.timeStep++;
-        this.gameObject.transform.position.x -= dt*speed;
+        this.gameObject.transform.position.x -= (float) (dt*speed);
         this.gameObject.transform.position.x = (float)Math.floor(this.gameObject.transform.position.x);
 
         if(this.gameObject.transform.position.x < -width)

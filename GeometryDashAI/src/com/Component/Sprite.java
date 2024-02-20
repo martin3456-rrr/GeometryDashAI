@@ -13,6 +13,7 @@ import java.io.File;
 public class Sprite extends Component {
     public BufferedImage image;
     public String pictureFile;
+
     public int width,height;
     public boolean isSubsprite = false;
     public int row,column,index;
@@ -101,7 +102,7 @@ public class Sprite extends Component {
         if(isSubsprite)
         {
             Parser.consume(',');
-            Parser.consumeStringProperty("row");
+            Parser.consumeIntProperty("row");
             Parser.consume(',');
             Parser.consumeIntProperty("column");
             Parser.consume(',');

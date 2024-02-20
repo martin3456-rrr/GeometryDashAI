@@ -11,7 +11,6 @@ public class TabItem extends Component {
     private int x,y,width,height;
     private Sprite sprite;
     public boolean isSelected;
-    private int bufferX,bufferY;
     private MainContainer parentContainer;
     public TabItem(int x, int y, int width, int height, Sprite sprite,MainContainer parent)
     {

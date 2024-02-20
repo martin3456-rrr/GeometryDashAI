@@ -10,28 +10,28 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public class BoxBounds extends Bounds {
-    public float width,height;
+    public double width,height;
     public float halfWidth,halfHeight;
     public Vector2 center = new Vector2();
     public boolean isTrigger = false;
     public float xBuffer = 0.0f;
     public float yBuffer = 0.0f;
     public float enclosingRadius;
-    public BoxBounds(float width, float height)
+    public BoxBounds(double width, double height)
     {
         init(width,height,false);
     }
-    public BoxBounds(float width,float height, boolean isTrigger)
+    public BoxBounds(double width,double height, boolean isTrigger)
     {
         init(width,height,isTrigger);
     }
-    public void init(float width,float height, boolean isTrigger)
+    public void init(double width,double height, boolean isTrigger)
     {
-        this.width=width;
-        this.height=height;
-        this.halfWidth = this.width/2.0f;
-        this.halfHeight=this.height/2.0f;
-        this.enclosingRadius = (float)Math.sqrt((this.halfWidth*this.halfWidth)+ this.halfHeight*this.halfHeight);
+        this.width = width;
+        this.height = height;
+        this.halfWidth = (float)this.width/2.0f;
+        this.halfHeight = (float)this.height/2.0f;
+        this.enclosingRadius = (float)Math.sqrt((this.halfWidth*this.halfWidth) + (this.halfHeight*this.halfHeight));
         this.type = BounsType.Box;
         this.isTrigger = isTrigger;
     }
@@ -44,11 +44,6 @@ public class BoxBounds extends Bounds {
     {
         this.center.x = this.gameObject.transform.position.x+this.halfWidth+this.xBuffer;
         this.center.y = this.gameObject.transform.position.y+this.halfHeight+this.yBuffer;
-
-    }
-    @Override
-    public void update(double dt)
-    {
 
     }
     public static boolean checkCollision(BoxBounds b1,BoxBounds b2)
@@ -80,8 +75,8 @@ public class BoxBounds extends Bounds {
         float dx = this.center.x-playerBounds.center.x;
         float dy = this.center.y-playerBounds.center.y;
 
-        float combinedHalfWidths = this.halfWidth+playerBounds.halfWidth;
-        float combinedHalfHeights = this.halfHeight+playerBounds.halfHeight;
+        float combinedHalfWidths = playerBounds.halfWidth+this.halfWidth;
+        float combinedHalfHeights = playerBounds.halfHeight+this.halfHeight;
 
         float overlapX = combinedHalfWidths - Math.abs(dx);
         float overlapY = combinedHalfHeights - Math.abs(dy);
@@ -116,8 +111,6 @@ public class BoxBounds extends Bounds {
                 player.getComponent(Player.class).die();
             }
         }
-
-
     }
     @Override
     public Component copy() {
@@ -132,8 +125,8 @@ public class BoxBounds extends Bounds {
        StringBuilder builder = new StringBuilder();
 
        builder.append(beginObjectProperty("BoxBounds",tabSize));
-       builder.append(addFloatProperty("Width",this.width,tabSize+1,true,true));
-       builder.append(addFloatProperty("Height",this.height,tabSize+1,true,true));
+       builder.append(addDoubleProperty("Width",this.width,tabSize+1,true,true));
+       builder.append(addDoubleProperty("Height",this.height,tabSize+1,true,true));
        builder.append(addFloatProperty("xBuffer",this.xBuffer,tabSize+1,true,true));
        builder.append(addFloatProperty("yBuffer",this.yBuffer,tabSize+1,true,true));
        builder.append(addBooleanProperty("isTrigger",this.isTrigger,tabSize+1,true,false));
@@ -143,9 +136,9 @@ public class BoxBounds extends Bounds {
     }
     public static BoxBounds deserialize()
     {
-        float width = Parser.consumeFloatProperty("Width");
+        double width = Parser.consumeDoubleProperty("Width");
         Parser.consume(',');
-        float height = Parser.consumeFloatProperty("Height");
+        double height = Parser.consumeDoubleProperty("Height");
         Parser.consume(',');
         float xBuffer = Parser.consumeFloatProperty("xBuffer");
         Parser.consume(',');
@@ -160,12 +153,12 @@ public class BoxBounds extends Bounds {
     }
     @Override
     public float getWidth() {
-        return this.width;
+        return (float)this.width;
     }
 
     @Override
     public float getHeight() {
-        return this.height;
+        return (float)this.height;
     }
 
     @Override
@@ -185,8 +178,8 @@ public class BoxBounds extends Bounds {
             g2.draw(new Rectangle2D.Float(
                     this.gameObject.transform.position.x+xBuffer,
                     this.gameObject.transform.position.y+yBuffer,
-                    this.width,
-                    this.height));
+                    (float)this.width,
+                    (float)this.height));
             g2.setStroke(Constants.LINE);
         }
     }

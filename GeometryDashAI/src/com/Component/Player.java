@@ -67,7 +67,7 @@ public class Player extends Component {
        }
        if (this.state !=PlayerState.FLYING && !onGround)
        {
-           gameObject.transform.rotation+=10.0f*dt;
+           gameObject.transform.rotation+= (float) (10.0f*dt);
        }
        else if(this.state !=PlayerState.FLYING)
        {
@@ -88,7 +88,7 @@ public class Player extends Component {
     }
     private void addFlyForce()
     {
-        gameObject.getComponent(Rigidbody.class).velocity.y = Constants.JUMP_FORCE;
+        gameObject.getComponent(Rigidbody.class).velocity.y = Constants.FLY_FORCE;
     }
     public void die()
     {
@@ -97,9 +97,8 @@ public class Player extends Component {
         gameObject.getComponent(Rigidbody.class).velocity.y = 0;
         gameObject.transform.rotation = 0;
         Window.getWindow().getCurrentScene().camera.position.x = 0;
-
+        state = PlayerState.NORMAL;
     }
-
     @Override
     public void draw(Graphics2D g2)
     {
@@ -126,13 +125,14 @@ public class Player extends Component {
             g2.drawImage(layerOne.image, transform, null);
             g2.drawImage(layerTwo.image, transform, null);
             g2.drawImage(layerThree.image, transform, null);
-            g2.drawImage(spaceship.image,transform,null);
+
 
             transform.setToIdentity();
             transform.translate(gameObject.transform.position.x,gameObject.transform.position.y);
             transform.rotate(gameObject.transform.rotation,
                     width*gameObject.transform.scale.x/2.0,height*gameObject.transform.scale.y/2.0);
             transform.scale(gameObject.transform.scale.x,gameObject.transform.scale.y);
+            g2.drawImage(spaceship.image,transform,null);
         }
 
     }

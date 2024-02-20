@@ -22,9 +22,8 @@ public class Portal extends Component {
     {
         this.bounds = gameObject.getComponent(BoxBounds.class);
         Scene scene = Window.getScene();
-        if(scene instanceof LevelScene)
+        if(scene instanceof LevelScene levelScene)
         {
-            LevelScene levelScene = (LevelScene)scene;
             this.player = levelScene.player;
         }
     }
@@ -37,6 +36,10 @@ public class Portal extends Component {
                 player.getComponent(Player.class).state = stateChanger;
             }
         }
+    }
+    @Override
+    public Component copy() {
+        return new Portal(this.stateChanger,this.player);
     }
     @Override
     public String serialize(int tabSize) {
@@ -57,8 +60,5 @@ public class Portal extends Component {
 
         return new Portal(stateChanger);
     }
-    @Override
-    public Component copy() {
-        return new Portal(this.stateChanger,this.player);
-    }
+
 }

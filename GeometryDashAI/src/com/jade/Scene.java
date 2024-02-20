@@ -15,15 +15,12 @@ public abstract class Scene {
     public void Scene(String name)
     {
         this.name=name;
-        this.camera= new Camera(new Vector2(1.0f,1.0f));
+        this.camera = new Camera(new Vector2());
         this.gameObject = new ArrayList<>();
         this.objsRemove = new ArrayList<>();
         this.renderer = new Renderer(this.camera);
     }
-    public void init()
-    {
-
-    }
+    public abstract void init();
     public List<GameObject> getAllGameObjects()
     {
         return gameObject;
@@ -41,6 +38,7 @@ public abstract class Scene {
             c.start();
         }
     }
+
     public abstract  void update(double dt);
     public abstract void draw(Graphics2D g2);
 }

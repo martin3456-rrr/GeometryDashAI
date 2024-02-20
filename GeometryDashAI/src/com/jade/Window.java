@@ -7,12 +7,11 @@ import javax.swing.JFrame;
 import java.awt.*;
 
 public class Window extends JFrame implements Runnable {
-   public ML MouseListener ;
-   public KL keyLister;
-   public boolean isInEditor = false;
-
+    public ML MouseListener;
+    public KL keyLister;
+    public boolean isInEditor = false;
     private static Window window = null;
-    private boolean isRunning = true;
+    public boolean isRunning = true;
     private Scene currentScene = null;
     private Image doubleBufferImage = null;
     private Graphics doubleBufferGraphics = null;
@@ -24,7 +23,7 @@ public class Window extends JFrame implements Runnable {
         this.setTitle(Constants.SCREEN_TITLE);
         this.setResizable(false);
         this.setVisible(true);
-        this.setDefaultCloseOperation((JFrame.EXIT_ON_CLOSE));
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.addKeyListener(keyLister);
         this.addMouseListener(MouseListener);
         this.addMouseMotionListener(MouseListener);
@@ -32,7 +31,7 @@ public class Window extends JFrame implements Runnable {
     }
     public void init()
     {
-       changeScene(0);
+        changeScene(0);
     }
     public Scene getCurrentScene()
     {
@@ -43,12 +42,12 @@ public class Window extends JFrame implements Runnable {
         switch(scene)
         {
             case 0:
-                isInEditor = false;
+                isInEditor = true;
                 currentScene = new LevelEditorScene("Level Editor");
                 currentScene.init();
                 break;
             case 1:
-                isInEditor = true;
+                isInEditor = false;
                 currentScene = new LevelScene("Level");
                 currentScene.init();
                 break;
@@ -60,11 +59,11 @@ public class Window extends JFrame implements Runnable {
     }
     public static Window getWindow()
     {
-      if(Window.window == null)
-      {
-          Window.window = new Window();
-      }
-      return Window.window;
+        if(Window.window == null)
+        {
+            Window.window = new Window();
+        }
+        return Window.window;
     }
     public static Scene getScene()
     {

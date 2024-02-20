@@ -13,9 +13,8 @@ public class GameObject extends Serialize {
      private String name;
      public Transform transform;
      public boolean serializable = true;
-     public boolean isUI = false;
      public int zIndex;
-
+     public boolean isUI = false;
      public GameObject(String name, Transform transform,int zIndex)
      {
          this.name=name;
@@ -41,15 +40,6 @@ public class GameObject extends Serialize {
        }
        return null;
      }
-     public List<Component> getAllComponents()
-     {
-            return this.components;
-     }
-     public void addComponent(Component c)
-     {
-         components.add(c);
-         c.gameObject=this;
-     }
      public <T extends Component> void removeComponent(Class<T> componentClass)
      {
         for(Component c : components)
@@ -61,6 +51,16 @@ public class GameObject extends Serialize {
             }
         }
      }
+     public List<Component> getAllComponents()
+     {
+            return this.components;
+     }
+     public void addComponent(Component c)
+     {
+         components.add(c);
+         c.gameObject=this;
+     }
+
      public GameObject copy()
      {
          GameObject newGameObject = new GameObject("Generated",transform.copy(),this.zIndex);
@@ -93,7 +93,6 @@ public class GameObject extends Serialize {
              c.draw(g2);
          }
      }
-
     @Override
     public String serialize(int tabSize) {
          if(!serializable) return "";
@@ -107,11 +106,10 @@ public class GameObject extends Serialize {
         builder.append(addStringProperty("Name", name,tabSize+1,true,true));
 
         //Name
-        if(components.size()>0)
+        if(!components.isEmpty())
         {
             builder.append(addIntProperty("ZIndex", this.zIndex,tabSize+1,true,true));
             builder.append(beginObjectProperty("Components",tabSize+1));
-
         }
         else
         {
@@ -135,7 +133,7 @@ public class GameObject extends Serialize {
             }
             i++;
         }
-        if(components.size()>0)
+        if(!components.isEmpty())
         {
             builder.append(closeObjectProperty(tabSize+1));
         }
@@ -170,7 +168,6 @@ public class GameObject extends Serialize {
              Parser.consumeEndObjectProperty();
          }
          Parser.consumeEndObjectProperty();
-
          return go;
      }
      public void setUI(boolean val)

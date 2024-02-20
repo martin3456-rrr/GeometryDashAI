@@ -16,14 +16,8 @@ public class Grid extends Component {
     public Grid()
     {
         this.camera = Window.getWindow().getCurrentScene().camera;
-        this.gridHeight = Constants.TILE_WIDTH;
-        this.gridWidth = Constants.TILE_HEIGHT;
-    }
-
-    @Override
-    public void update(double dt)
-    {
-
+        this.gridWidth = Constants.TILE_WIDTH;
+        this.gridHeight = Constants.TILE_HEIGHT;
     }
     @Override
     public void draw(Graphics2D g2)
