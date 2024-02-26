@@ -103,8 +103,6 @@ public class LevelScene extends Scene{
                 }
             }
         }
-
-
     }
     private void importLevel(String filename)
     {
