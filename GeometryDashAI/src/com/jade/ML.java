@@ -1,5 +1,6 @@
 package com.jade;
 
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -38,5 +39,4 @@ public class ML extends MouseAdapter {
         this.dx = mouseEvent.getX() - this.x;
         this.dy = mouseEvent.getY() - this.y;
     }
-
 }

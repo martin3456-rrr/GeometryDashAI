@@ -31,7 +31,7 @@ public class Window extends JFrame implements Runnable {
     }
     public void init()
     {
-        changeScene(0);
+        changeScene(2);
     }
     public Scene getCurrentScene()
     {
@@ -49,6 +49,11 @@ public class Window extends JFrame implements Runnable {
             case 1:
                 isInEditor = false;
                 currentScene = new LevelScene("Level");
+                currentScene.init();
+                break;
+            case 2:
+                isInEditor = false;
+                currentScene = new MenuScene("Menu");
                 currentScene.init();
                 break;
             default:
@@ -113,5 +118,8 @@ public class Window extends JFrame implements Runnable {
         {
             e.printStackTrace();
         }
+    }
+    public void close() {
+        System.exit(0);
     }
 }
