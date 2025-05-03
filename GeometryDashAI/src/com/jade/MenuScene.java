@@ -60,16 +60,20 @@ public class MenuScene extends Scene {
         }
         Vector2 mousePos = new Vector2(mouseListener.x, mouseListener.y);
 
-        if (startGameButton.contains(mousePos.x, mousePos.y)) {
+        if (startGameButton != null && startGameButton.contains(mousePos.x, mousePos.y)) { // Sprawdzenie null
             if ((mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1)) {
+                String selectedLevel = "Level 1"; // Tymczasowo hardkodowane
+                System.out.println("Starting level: " + selectedLevel);
                 Window.getWindow().changeScene(1);
+                mouseListener.mousePressed = false;
             }
-        } else if (exitButton.contains(mousePos.x, mousePos.y)) {
+        } else if (exitButton != null && exitButton.contains(mousePos.x, mousePos.y)) { // Sprawdzenie null
             if (mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
                 Window.getWindow().close();
             }
         }
     }
+
 
     @Override
     public void draw(Graphics2D g2) {

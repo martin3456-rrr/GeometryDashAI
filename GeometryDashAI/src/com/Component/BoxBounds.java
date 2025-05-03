@@ -1,6 +1,5 @@
 package com.Component;
 
-import com.File.Parser;
 import com.jade.Component;
 import com.jade.GameObject;
 import com.util.Constants;
@@ -114,38 +113,6 @@ public class BoxBounds extends Bounds {
     }
     @Override
     public Component copy() {
-        BoxBounds bounds = new BoxBounds(width,height,isTrigger);
-        bounds.xBuffer = xBuffer;
-        bounds.yBuffer = yBuffer;
-        return bounds;
-    }
-
-    @Override
-    public String serialize(int tabSize) {
-       StringBuilder builder = new StringBuilder();
-
-       builder.append(beginObjectProperty("BoxBounds",tabSize));
-       builder.append(addDoubleProperty("Width",this.width,tabSize+1,true,true));
-       builder.append(addDoubleProperty("Height",this.height,tabSize+1,true,true));
-       builder.append(addFloatProperty("xBuffer",this.xBuffer,tabSize+1,true,true));
-       builder.append(addFloatProperty("yBuffer",this.yBuffer,tabSize+1,true,true));
-       builder.append(addBooleanProperty("isTrigger",this.isTrigger,tabSize+1,true,false));
-       builder.append(closeObjectProperty(tabSize));
-
-       return builder.toString();
-    }
-    public static BoxBounds deserialize()
-    {
-        double width = Parser.consumeDoubleProperty("Width");
-        Parser.consume(',');
-        double height = Parser.consumeDoubleProperty("Height");
-        Parser.consume(',');
-        float xBuffer = Parser.consumeFloatProperty("xBuffer");
-        Parser.consume(',');
-        float yBuffer = Parser.consumeFloatProperty("yBuffer");
-        Parser.consume(',');
-        boolean isTrigger = Parser.consumeBooleanProperty("isTrigger");
-        Parser.consumeEndObjectProperty();
         BoxBounds bounds = new BoxBounds(width,height,isTrigger);
         bounds.xBuffer = xBuffer;
         bounds.yBuffer = yBuffer;

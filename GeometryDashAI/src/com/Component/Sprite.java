@@ -1,6 +1,5 @@
 package com.Component;
 
-import com.File.Parser;
 import com.dataStructure.AssertPool;
 import com.jade.Component;
 
@@ -74,53 +73,5 @@ public class Sprite extends Component {
         {
             return new Sprite(this.image,this.row,this.column,this.index,pictureFile);
         }
-    }
-    @Override
-    public String serialize(int tabSize) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(beginObjectProperty("Sprite",tabSize));
-        builder.append(addBooleanProperty("isSubsprite",isSubsprite,tabSize+1,true,true));
-        if(isSubsprite)
-        {
-            builder.append(addStringProperty("FilePath",pictureFile,tabSize+1,true,true));
-            builder.append(addIntProperty("row",row,tabSize+1,true,true));
-            builder.append(addIntProperty("column",column,tabSize+1,true,true));
-            builder.append(addIntProperty("index",index,tabSize+1,true,false));
-            builder.append(closeObjectProperty(tabSize));
-
-            return builder.toString();
-        }
-        builder.append(addStringProperty("FilePath",pictureFile,tabSize+1,true,false));
-        builder.append(closeObjectProperty(tabSize));
-        return builder.toString();
-    }
-    public static Sprite deserialize()
-    {
-        boolean isSubsprite = Parser.consumeBooleanProperty("isSubsprite");
-        Parser.consume(',');
-        String filePath = Parser.consumeStringProperty("FilePath");
-        if(isSubsprite)
-        {
-            Parser.consume(',');
-            Parser.consumeIntProperty("row");
-            Parser.consume(',');
-            Parser.consumeIntProperty("column");
-            Parser.consume(',');
-            int index = Parser.consumeIntProperty("index");
-            if(!AssertPool.hasSpritedsheet(filePath))
-            {
-                System.out.println("Spritesheet '"+filePath+"' has not been loaded yet!");
-                System.exit(-1);
-            }
-            Parser.consumeEndObjectProperty();
-            return (Sprite)AssertPool.getSpritesheet(filePath).sprite.get(index).copy();
-        }
-        if(!AssertPool.hasSprite(filePath))
-        {
-            System.out.println("Sprite '" + filePath + "' has not been loaded yet!");
-            System.exit(-1);
-        }
-        Parser.consumeEndObjectProperty();
-        return (Sprite)AssertPool.getSprite(filePath).copy();
     }
 }

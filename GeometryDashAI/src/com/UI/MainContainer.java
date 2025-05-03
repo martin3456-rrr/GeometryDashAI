@@ -205,11 +205,6 @@ public class MainContainer extends Component {
             g.draw(g2);
         }
     }
-
-    @Override
-    public String serialize(int tabSize) {
-        return "";
-    }
     public void setHotButton(GameObject obj)
     {
         this.hotButton = obj;

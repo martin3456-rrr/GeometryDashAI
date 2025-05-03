@@ -38,8 +38,4 @@ public class Ground extends Component {
     public Component copy() {
         return this;
     }
-    @Override
-    public String serialize(int tabSize) {
-        return "";
-    }
 }

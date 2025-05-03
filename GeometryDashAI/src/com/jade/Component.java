@@ -1,10 +1,8 @@
 package com.jade;
 
-import com.File.Serialize;
-
 import java.awt.*;
 
-public abstract class Component<T> extends Serialize {
+public abstract class Component<T>{
     public GameObject gameObject;
     public void update(double dt)
     {

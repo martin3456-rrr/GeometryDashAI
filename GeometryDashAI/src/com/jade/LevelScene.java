@@ -1,46 +1,64 @@
 package com.jade;
 
 import com.Component.*;
-import com.File.Parser;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
+import com.manager.Difficulty;
+import com.manager.DifficultyManager;
 import com.util.Constants;
 import com.util.Vector2;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-public class LevelScene extends Scene{
+public class LevelScene extends Scene {
     public GameObject player;
     public BoxBounds playerBounds;
-    public LevelScene(String name)
-    {
+    private Ground ground;
+    private LevelGenerator levelGenerator;
+    private String levelId;
+    private List<GameObject> obstaclesToRemove = new ArrayList<>();
+
+    public LevelScene(String name) {
         super.Scene(name);
     }
     @Override
     public void init() {
+        this.levelId = levelId;
         initAssetPool();
-        player = new GameObject("Some game object",new Transform(new Vector2(100.0f,300.0f)),0);
+        Difficulty difficulty = DifficultyManager.getInstance().getDifficultyForLevel(levelId);
+        initPlayer();
+        initBackgroundsAndGround();
+        updateCameraPosition();
+        levelGenerator = new LevelGenerator(difficulty);
+    }
+
+    private void initPlayer() {
+        float x = 120.0f;
+        float y = Constants.GROUND_Y - Constants.PLAYER_HEIGHT ;
+        player = new GameObject("Player", new Transform(new Vector2(x, y)), 0);
 
         Spritesheet layerOne = AssertPool.getSpritesheet("assets/player/layerOne.png");
         Spritesheet layerTwo = AssertPool.getSpritesheet("assets/player/layerTwo.png");
         Spritesheet layerThree = AssertPool.getSpritesheet("assets/player/layerThree.png");
-        Player playerComp = new Player(
-                layerOne.sprite.getFirst(),
-                layerTwo.sprite.getFirst(),
-                layerThree.sprite.getFirst(),
-                Color.RED,
-                Color.GREEN);
-        player.addComponent(playerComp);
-        player.addComponent(new Rigidbody(new Vector2(Constants.PLAYER_SPEED,0)));
-        playerBounds = new BoxBounds(Constants.TILE_WIDTH-2,Constants.TILE_HEIGHT-2);
-        player.addComponent(playerBounds);
-        renderer.submit(player);
-        initBackgrounds();
-        importLevel("Test");
 
+        if (layerOne == null || layerTwo == null || layerThree == null ||
+                layerOne.sprite.isEmpty() || layerTwo.sprite.isEmpty() || layerThree.sprite.isEmpty()) {
+            player.addComponent(new Sprite("assets/player/spaceship.png"));
+        } else {
+            Player playerComp = new Player(layerOne.sprite.getFirst(), layerTwo.sprite.getFirst(), layerThree.sprite.getFirst(), Color.RED, Color.GREEN);
+            player.addComponent(playerComp);
+        }
+
+        player.addComponent(new Rigidbody(new Vector2(Constants.PLAYER_SPEED, 0)));
+        playerBounds = new BoxBounds(Constants.PLAYER_WIDTH , Constants.PLAYER_HEIGHT );
+        player.addComponent(playerBounds);
+        addGameObject(player);
     }
-    public void initBackgrounds()
-    {
+
+    private void initBackgroundsAndGround() {
         GameObject ground;
         ground = new GameObject("Ground",new Transform(
                 new Vector2(0,Constants.GROUND_Y)),1);
@@ -58,9 +76,10 @@ public class LevelScene extends Scene{
             go.setUI(true);
             go.addComponent(bg);
             backgrounds[i] = go;
+
             ParallaxBackgrounds groundBg = new ParallaxBackgrounds("assets/grounds/ground01.png",groundBgs,ground.getComponent(Ground.class),true);
             x = i*groundBg.sprite.width;
-            y = bg.sprite.height;
+            y = 0;
             GameObject groundGo = new GameObject("GroundBg",new Transform(new Vector2(x,y)),-9);
             groundGo.addComponent(groundBg);
             groundGo.setUI(true);
@@ -69,16 +88,66 @@ public class LevelScene extends Scene{
             addGameObject(groundGo);
         }
     }
-    public void initAssetPool()
-    {
+
+    private void initAssetPool() {
         AssertPool.addSpritesheet("assets/player/layerOne.png",42,42,2,13,13*5);
         AssertPool.addSpritesheet("assets/player/layerTwo.png",42,42,2,13,13*5);
         AssertPool.addSpritesheet("assets/player/layerThree.png",42,42,2,13,13*5);
         AssertPool.addSpritesheet("assets/groundSprites.png", 42, 42, 2, 6, 12);
         AssertPool.getSprite("assets/player/spaceship.png");
+
+        AssertPool.addSpritesheet("assets/spikes.png",42,42,2,6,4);
+        AssertPool.addSpritesheet("assets/bigSprites.png",84,84,2,2,2);
+        AssertPool.addSpritesheet("assets/smallBlocks.png",42,42,2,6,1);
+        AssertPool.addSpritesheet("assets/portal.png",44,85,2,2,2);
+
     }
+
     @Override
     public void update(double dt) {
+        if (player == null) return;
+        updateCameraPosition();
+
+        player.update(dt);
+        Player pc = player.getComponent(Player.class);
+        if (pc != null) pc.onGround = false;
+
+        if (levelGenerator != null) {
+            levelGenerator.update(dt);
+        }
+
+        Iterator<GameObject> it = gameObject.iterator();
+        while (it.hasNext()) {
+            GameObject go = it.next();
+            if (go == player) continue;
+            go.update(dt);
+
+            Bounds b = go.getComponent(Bounds.class);
+            if (b != null && Bounds.checkCollision(playerBounds, b)) {
+                Bounds.resolveCollision(b, player);
+            }
+
+            if (go.transform.position.x + Constants.TILE_WIDTH < camera.position.x - Constants.TILE_WIDTH * 5
+                    && !go.isUI && go != player) {
+                obstaclesToRemove.add(go);
+            }
+        }
+
+        for (GameObject go : obstaclesToRemove) {
+            removeGameObject(go);
+        }
+        obstaclesToRemove.clear();
+
+        if (!objsRemove.isEmpty()) {
+            for (GameObject dead : objsRemove) {
+                gameObject.remove(dead);
+                renderer.remove(dead);
+            }
+            objsRemove.clear();
+        }
+    }
+
+    private void updateCameraPosition() {
         if(player.transform.position.x - camera.position.x>Constants.CAMERA_OFFSET_X)
         {
             camera.position.x = player.transform.position.x - Constants.CAMERA_OFFSET_X;
@@ -88,36 +157,18 @@ public class LevelScene extends Scene{
         {
             camera.position.y = Constants.CAMERA_OFFSET_GROUND_Y;
         }
-        player.update(dt);
-        player.getComponent(Player.class).onGround = false;
 
-        for(GameObject g: gameObject)
-        {
-            g.update(dt);
-            Bounds b = g.getComponent(Bounds.class);
-            if(b!=null)
-            {
-                if(BoxBounds.checkCollision(playerBounds,b))
-                {
-                    Bounds.resolveCollision(b,player);
-                }
-            }
-        }
     }
-    private void importLevel(String filename)
-    {
-        Parser.openFile(filename);
-        GameObject go = Parser.parseGameObject();
-        while (go != null) {
-            addGameObject(go);
-            go = Parser.parseGameObject();
-        }
-    }
+
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(Constants.BG_COLOR);
-        g2.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
+        g2.fillRect(0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         renderer.render(g2);
     }
-
+    @Override
+    public void removeGameObject(GameObject go) {
+        if (objsRemove == null) objsRemove = new ArrayList<>();
+        if (!objsRemove.contains(go)) objsRemove.add(go);
+    }
 }

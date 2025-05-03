@@ -67,4 +67,14 @@ public class Renderer {
             currentZIndex++;
         }
     }
+    public void remove(GameObject go) {
+        List<GameObject> objectsAtZ = gameObjects.get(go.zIndex);
+        if (objectsAtZ != null) {
+            objectsAtZ.remove(go);
+            if (objectsAtZ.isEmpty()) {
+                gameObjects.remove(go.zIndex);
+            }
+        }
+    }
+
 }

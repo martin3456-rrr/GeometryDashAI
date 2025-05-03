@@ -2,7 +2,7 @@ package com.Component;
 
 import com.jade.Component;
 import com.jade.GameObject;
-import com.jade.LevelEditorScene;
+import com.jade.LevelScene;
 import com.jade.Window;
 import com.util.Constants;
 import com.util.Vector2;
@@ -16,7 +16,7 @@ enum Direction
 {
     UP,DOWN,LEFT,RIGHT
 }
-public class LevelEditorControls extends Component { ;
+public class LevelControls extends Component { ;
     private float debounceTime = 0.2f;
     private float debounceLeft = 0.0f;
     private float debounceKey = 0.2f;
@@ -28,7 +28,7 @@ public class LevelEditorControls extends Component { ;
     private boolean isEditing = false;
     private boolean wasDragged = false;
     private float dragX,dragY,dragWidth,dragHeight;
-    public LevelEditorControls(int gridWidth, int gridHeight)
+    public LevelControls(int gridWidth, int gridHeight)
     {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
@@ -93,8 +93,8 @@ public class LevelEditorControls extends Component { ;
     {
         GameObject newGameObj = new GameObject("Mouse Cursor",this.gameObject.transform.copy(),this.gameObject.zIndex);
         newGameObj.addComponent(this);
-        LevelEditorScene scene = (LevelEditorScene)Window.getScene();
-        scene.mouseCursor = newGameObj;
+        LevelScene scene = (LevelScene)Window.getScene();
+        scene.player = newGameObj;
         isEditing = false;
     }
     public void clearSelected()
@@ -144,7 +144,7 @@ public class LevelEditorControls extends Component { ;
         {
             wasDragged = false;
             clearSelected();
-            LevelEditorScene scene = (LevelEditorScene) Window.getScene();
+            LevelScene scene = (LevelScene) Window.getScene();
             List<GameObject> objs = boxCast(dragX,dragY,dragWidth,dragHeight);
             for(GameObject go : objs)
             {
@@ -323,9 +323,5 @@ public class LevelEditorControls extends Component { ;
     @Override
     public Component copy() {
         return null;
-    }
-    @Override
-    public String serialize(int tabSize) {
-        return "";
     }
 }

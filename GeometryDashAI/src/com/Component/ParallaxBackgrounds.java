@@ -84,11 +84,6 @@ public class ParallaxBackgrounds extends Component {
         }
     }
     @Override
-    public String serialize(int tabSize) {
-        return null;
-    }
-
-    @Override
     public Component copy() {
         return null;
     }

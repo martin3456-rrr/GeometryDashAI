@@ -1,10 +1,10 @@
 package com.UI;
 
-import com.Component.LevelEditorControls;
+import com.Component.LevelControls;
 import com.Component.Sprite;
 import com.jade.Component;
 import com.jade.GameObject;
-import com.jade.LevelEditorScene;
+import com.jade.LevelScene;
 import com.jade.Window;
 
 import java.awt.*;
@@ -46,11 +46,11 @@ public class MenuItem extends Component {
               //Click insider the button
               GameObject obj = gameObject.copy();
               obj.removeComponent(MenuItem.class);
-              LevelEditorScene scene =(LevelEditorScene)Window.getWindow().getCurrentScene();
+              LevelScene scene =(LevelScene)Window.getWindow().getCurrentScene();
 
-              LevelEditorControls snapToGrid = scene.mouseCursor.getComponent(LevelEditorControls.class);
+              LevelControls snapToGrid = scene.player.getComponent(LevelControls.class);
               obj.addComponent(snapToGrid);
-              scene.mouseCursor = obj;
+              scene.player = obj;
               isSelected = true;
               this.parentContainer.setHotButton(gameObject);
           }
@@ -73,10 +73,5 @@ public class MenuItem extends Component {
         {
             g2.drawImage(hoverSprite.image,this.x,this.y,this.width,this.height,null);
         }
-    }
-
-    @Override
-    public String serialize(int tabSize) {
-        return "";
     }
 }

@@ -1,11 +1,9 @@
 package com.dataStructure;
 
-import com.File.Parser;
-import com.File.Serialize;
 import com.util.Vector2;
 
 
-public class Transform extends Serialize {
+public class Transform  {
     public Vector2 position;
     public Vector2 scale;
     public float rotation;
@@ -26,50 +24,5 @@ public class Transform extends Serialize {
     public String toString()
     {
         return "Position ("+position.x+", "+position.y+")";
-    }
-
-    @Override
-    public String serialize(int tabSize) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(beginObjectProperty("Transform",tabSize));
-        builder.append(beginObjectProperty("Position",tabSize+1));
-        builder.append(position.serialize(tabSize+2));
-        builder.append(closeObjectProperty(tabSize+1));
-
-        builder.append(addEding(true,true));
-
-        builder.append(beginObjectProperty("Scale",tabSize+1));
-        builder.append(scale.serialize(tabSize+2));
-        builder.append(closeObjectProperty(tabSize+1));
-
-        builder.append(addEding(true,true));
-
-        builder.append(addFloatProperty("rotation",rotation,tabSize+1,true,false));
-        builder.append(closeObjectProperty(tabSize));
-
-        return builder.toString();
-    }
-    public static Transform deserialize()
-    {
-        Parser.consumeBeginObjectProperty("Transform");
-        Parser.consumeBeginObjectProperty("Position");
-
-        Vector2 position = Vector2.deserialize();
-        Parser.consumeEndObjectProperty();
-
-        Parser.consume(',');
-        Parser.consumeBeginObjectProperty("Scale");
-        Vector2 scale = Vector2.deserialize();
-        Parser.consumeEndObjectProperty();
-
-        Parser.consume(',');
-        float rotation = Parser.consumeFloatProperty("rotation");
-        Parser.consumeEndObjectProperty();
-
-        Transform t = new Transform(position);
-        t.scale = scale;
-        t.rotation = rotation;
-
-        return t;
     }
 }

@@ -1,6 +1,5 @@
 package com.Component;
 
-import com.File.Parser;
 import com.jade.Component;
 import com.jade.Window;
 import com.util.Constants;
@@ -250,26 +249,6 @@ public class TriangleBounds extends Bounds{
                     this.y2 - Window.getScene().camera.position.y));
             g2.setStroke(Constants.LINE);
         }
-    }
-    @Override
-    public String serialize(int tabSize) {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(beginObjectProperty("TriangleBounds",tabSize));
-        builder.append(addDoubleProperty("Width",this.base,tabSize+1,true,true));
-        builder.append(addDoubleProperty("Height",this.height,tabSize+1,true,false));
-        builder.append(closeObjectProperty(tabSize));
-
-        return builder.toString();
-    }
-    public static TriangleBounds deserialize()
-    {
-        double base = Parser.consumeDoubleProperty("Width");
-        Parser.consume(',');
-        double height = Parser.consumeDoubleProperty("Height");
-        Parser.consumeEndObjectProperty();
-
-        return new TriangleBounds((float)base,(float)height);
     }
     @Override
     public Component copy() {

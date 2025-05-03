@@ -1,5 +1,6 @@
 package com.jade;
 
+import com.manager.DifficultyManager;
 import com.util.Constants;
 import com.util.Time;
 
@@ -15,10 +16,12 @@ public class Window extends JFrame implements Runnable {
     private Scene currentScene = null;
     private Image doubleBufferImage = null;
     private Graphics doubleBufferGraphics = null;
+    private DifficultyManager difficultyManager;
     public Window()
     {
         this.MouseListener = new ML();
         this.keyLister = new KL();
+        this.difficultyManager = DifficultyManager.getInstance();
         this.setSize(Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
         this.setTitle(Constants.SCREEN_TITLE);
         this.setResizable(false);
@@ -31,7 +34,7 @@ public class Window extends JFrame implements Runnable {
     }
     public void init()
     {
-        changeScene(2);
+        changeScene(0);
     }
     public Scene getCurrentScene()
     {
@@ -42,18 +45,11 @@ public class Window extends JFrame implements Runnable {
         switch(scene)
         {
             case 0:
-                isInEditor = true;
-                currentScene = new LevelEditorScene("Level Editor");
+                currentScene = new MenuScene("Menu");
                 currentScene.init();
                 break;
             case 1:
-                isInEditor = false;
                 currentScene = new LevelScene("Level");
-                currentScene.init();
-                break;
-            case 2:
-                isInEditor = false;
-                currentScene = new MenuScene("Menu");
                 currentScene.init();
                 break;
             default:
@@ -69,6 +65,9 @@ public class Window extends JFrame implements Runnable {
             Window.window = new Window();
         }
         return Window.window;
+    }
+    public DifficultyManager getDifficultyManager() {
+        return this.difficultyManager;
     }
     public static Scene getScene()
     {
