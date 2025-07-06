@@ -1,6 +1,5 @@
 package com.jade;
 
-import com.manager.DifficultyManager;
 import com.util.Constants;
 import com.util.Time;
 
@@ -16,12 +15,10 @@ public class Window extends JFrame implements Runnable {
     private Scene currentScene = null;
     private Image doubleBufferImage = null;
     private Graphics doubleBufferGraphics = null;
-    private DifficultyManager difficultyManager;
     public Window()
     {
         this.MouseListener = new ML();
         this.keyLister = new KL();
-        this.difficultyManager = DifficultyManager.getInstance();
         this.setSize(Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
         this.setTitle(Constants.SCREEN_TITLE);
         this.setResizable(false);
@@ -65,9 +62,6 @@ public class Window extends JFrame implements Runnable {
             Window.window = new Window();
         }
         return Window.window;
-    }
-    public DifficultyManager getDifficultyManager() {
-        return this.difficultyManager;
     }
     public static Scene getScene()
     {
