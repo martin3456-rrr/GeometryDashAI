@@ -16,6 +16,8 @@ public class Sprite extends Component {
     public int width,height;
     public boolean isSubsprite = false;
     public int row,column,index;
+    public float alpha = 1.0f;
+
     public Sprite(String pictureFile)
     {
         this.pictureFile=pictureFile;
@@ -57,21 +59,42 @@ public class Sprite extends Component {
     {
         AffineTransform transform = new AffineTransform();
         transform.setToIdentity();
-        transform.translate(gameObject.transform.position.x,gameObject.transform.position.y);
+        transform.translate(gameObject.transform.position.x, gameObject.transform.position.y);
         transform.rotate(Math.toRadians(gameObject.transform.rotation),
-                width*gameObject.transform.scale.x/2.0,height*gameObject.transform.scale.y/2.0);
-        transform.scale(gameObject.transform.scale.x,gameObject.transform.scale.y);
-        g2.drawImage(image,transform,null);
+                width * gameObject.transform.scale.x / 2.0, height * gameObject.transform.scale.y / 2.0);
+        transform.scale(gameObject.transform.scale.x, gameObject.transform.scale.y);
+
+        Composite originalComposite = g2.getComposite();
+        if (alpha < 1.0f) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        }
+
+        g2.drawImage(image, transform, null);
+
+        g2.setComposite(originalComposite);
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
-        if(!isSubsprite)
-        {
-            return new Sprite(this.image,pictureFile);
+        Sprite newSprite;
+        if (!isSubsprite) {
+            newSprite = new Sprite(this.image, pictureFile);
+        } else {
+            newSprite = new Sprite(this.image, this.row, this.column, this.index, pictureFile);
         }
-        else
-        {
-            return new Sprite(this.image,this.row,this.column,this.index,pictureFile);
-        }
+        newSprite.alpha = this.alpha;
+        return newSprite;
+    }
+    @Override
+    public void update(double dt) {
+        // No update logic needed for a static sprite by default
     }
 }

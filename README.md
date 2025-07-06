@@ -1,22 +1,31 @@
-# Geometry Dash in Java
-Currently supports level editing for one level. You can edit the source code and build multiple levels
-fairly easily. I just haven't built in a GUI support system for that yet.
+# Geometry Dash AI - Java Implementation
 
-## Controls
-* F2 to play from edit mode
-* F1 to exit play mode and enter edit mode
+Geometry Dash game implementation in Java with level functionality and genetic algorithm for automatic level generation.
 
-## Controls in play mode
-* Space to jump
-* Space to fly
-* F1 to exit
+## ✨ Features
+- **Game mode** with physics and collisions
+- **Genetic algorithm** for automatic level generation
+- **Fitness system** assessing the quality of generated levels
+- **Graphical interface** with main menu
 
-## Controls in edit mode
-* Ctrl+D to duplicate
-* Press scroll button on mouse to pan camera
-* Shift+Arrow_keys to move objects 1/10 of a block
-* Arrow keys to move selected objects
-* Mouse click to select individual objects, or clear selection
-* Mouse drag to select multiple objects
-* Rotate buttons to rotate selected objects
-* Delete to delete selected objects
+## 🎮 Controls
+### Game Mode
+- **Space** - Jump/Fly
+
+## 🧬 Genetic algorithm
+The game features an advanced level generation system based on a genetic algorithm that evaluates levels according to the following criteria:
+- **Playability** - whether the level can be completed
+- **Difficulty** - the right balance of obstacles
+- **Diversity** - avoiding monotonous sections
+- **Flow/Rhythm** - smoothness of gameplay
+
+## 🚀 Starting
+1. Clone the repository
+2. Open the project in the IDE (IntelliJ IDEA/Eclipse)
+3. Run the `Main.java` class
+4. Select "Start Game" from the main menu
+
+## 🛠️ Requirements
+- Java 24+
+- IDE with Java support
+- Graphic libraries (AWT/Swing)

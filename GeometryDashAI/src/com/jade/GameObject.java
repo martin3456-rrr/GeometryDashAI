@@ -13,6 +13,7 @@ public class GameObject {
      public boolean serializable = true;
      public int zIndex;
      public boolean isUI = false;
+     private Scene scene;
      public GameObject(String name, Transform transform,int zIndex)
      {
          this.name=name;
@@ -94,5 +95,16 @@ public class GameObject {
      public void setUI(boolean val)
      {
          this.isUI = val;
+     }
+     public String getName() {
+        return this.name;
+     }
+
+     public Scene getScene() {
+         return this.scene;
+     }
+
+     public void setScene(Scene scene) {
+         this.scene = scene;
      }
 }

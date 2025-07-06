@@ -16,7 +16,7 @@ enum Direction
 {
     UP,DOWN,LEFT,RIGHT
 }
-public class LevelControls extends Component { ;
+public class LevelControls extends Component {
     private float debounceTime = 0.2f;
     private float debounceLeft = 0.0f;
     private float debounceKey = 0.2f;
@@ -320,6 +320,15 @@ public class LevelControls extends Component { ;
 
         }
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
         return null;

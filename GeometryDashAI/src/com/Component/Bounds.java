@@ -9,11 +9,14 @@ enum BounsType
     Box,
     Triangle
 }
+
 public abstract class Bounds extends Component {
     public BounsType type;
     public boolean isSelected;
+
     abstract public float getWidth();
     abstract public float getHeight();
+
     abstract public boolean raycast(Vector2 position);
 
     public static boolean checkCollision(Bounds b1,Bounds b2)
@@ -33,6 +36,7 @@ public abstract class Bounds extends Component {
         }
         return false;
     }
+    
     public static void resolveCollision(Bounds b, GameObject plr)
     {
         if(b.type == BounsType.Box)

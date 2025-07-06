@@ -139,14 +139,14 @@ public class MainContainer extends Component {
 
                 obj.addComponent(new BoxBounds(44,85,true));
 
-                // TODO:: Create portalComponent here
+                // Poprawione - używamy StateChangePortal.PortalType zamiast PlayerState
                 if(i==0)
                 {
-                    obj.addComponent(new Portal(PlayerState.FLYING));
+                    obj.addComponent(new StateChangePortal(StateChangePortal.PortalType.SHIP));
                 }
                 else
                 {
-                    obj.addComponent(new Portal(PlayerState.NORMAL));
+                    obj.addComponent(new StateChangePortal(StateChangePortal.PortalType.CUBE));
                 }
                 this.tabMaps.get(tabs.get(5)).add(obj);
             }
@@ -168,6 +168,15 @@ public class MainContainer extends Component {
 
         }
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public void update(double dt)
     {

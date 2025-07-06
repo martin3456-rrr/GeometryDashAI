@@ -55,6 +55,15 @@ public class TabItem extends Component {
             g2.setComposite(ac);
         }
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
         return null;

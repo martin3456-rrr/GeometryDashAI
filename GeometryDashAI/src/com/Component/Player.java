@@ -11,10 +11,15 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 
 public class Player extends Component {
+    public enum Speed { SLOW, NORMAL, FAST }
     Sprite layerOne,layerTwo,layerThree,spaceship;
     public int width,height;
+    public Rigidbody rb;
     public boolean onGround = true;
     public PlayerState state;
+    public float gravityMultiplier = 1.0f;
+    public float speedMultiplier = 1.0f;
+    public float scaleMultiplier = 1.0f;
     public Player(Sprite layerOne, Sprite layerTwo, Sprite layerThree, Color colorOne, Color colorTwo)
     {
         this.spaceship = AssertPool.getSprite("assets/player/spaceship.png");
@@ -48,39 +53,123 @@ public class Player extends Component {
             }
        }
     }
+    @Override
+    public void start() {
+        this.rb = gameObject.getComponent(Rigidbody.class);
+    }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
 
     @Override
     public void update(double dt)
     {
-       if(onGround && Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_SPACE))
-       {
-           if(state == PlayerState.NORMAL)
-           {
-               addJumpForce();
-           }
-           this.onGround = false;
-       }
-       if(PlayerState.FLYING == this.state && Window.getWindow().keyLister.IsKeyPressed(KeyEvent.VK_SPACE))
-       {
-           addFlyForce();
-           this.onGround = false;
-       }
-       if (this.state !=PlayerState.FLYING && !onGround)
-       {
-           gameObject.transform.rotation+= (float) (10.0f*dt);
-       }
-       else if(this.state !=PlayerState.FLYING)
-       {
-           gameObject.transform.rotation = (int)gameObject.transform.rotation % 360;
-           if(gameObject.transform.rotation > 180 && gameObject.transform.rotation < 360)
-           {
-               gameObject.transform.rotation = 0;
-           }
-           else if(gameObject.transform.rotation > 0 && gameObject.transform.rotation < 180)
-           {
-               gameObject.transform.rotation = 0;
-           }
-       }
+        // Zastosuj prędkość
+        gameObject.transform.position.x += (float)(Constants.PLAYER_SPEED * speedMultiplier * dt);
+
+        switch (state) {
+            case NORMAL:
+                handleNormalState();
+                break;
+            case FLYING:
+                handleFlyingState(dt); // Przekaż dt jako parametr
+                break;
+            case BALL:
+                handleBallState();
+                break;
+            case UFO:
+                handleUfoState();
+                break;
+            case WAVE:
+                handleWaveState(dt);
+                break;
+        }
+
+        gameObject.transform.scale.x = scaleMultiplier;
+        gameObject.transform.scale.y = scaleMultiplier * gravityMultiplier;
+        
+        if(onGround && Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE))
+        {
+            if(state == PlayerState.NORMAL)
+            {
+                addJumpForce();
+            }
+            this.onGround = false;
+        }
+        if(PlayerState.FLYING == this.state && Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE))
+        {
+            addFlyForce();
+            this.onGround = false;
+        }
+        if (this.state !=PlayerState.FLYING && !onGround)
+        {
+            gameObject.transform.rotation+= (float) (10.0f*dt);
+        }
+        else if(this.state !=PlayerState.FLYING)
+        {
+            gameObject.transform.rotation = (int)gameObject.transform.rotation % 360;
+            if(gameObject.transform.rotation > 180 && gameObject.transform.rotation < 360)
+            {
+                gameObject.transform.rotation = 0;
+            }
+            else if(gameObject.transform.rotation > 0 && gameObject.transform.rotation < 180)
+            {
+                gameObject.transform.rotation = 0;
+            }
+        }
+    }
+
+    private void handleNormalState() {
+        if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE) && onGround) {
+            rb.velocity.y = Constants.JUMP_FORCE * gravityMultiplier;
+            onGround = false;
+        }
+    }
+
+    private void handleFlyingState(double dt) { // Dodaj parametr dt
+        if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
+            rb.velocity.y += Constants.FLY_FORCE * gravityMultiplier * dt;
+        }
+        // Ograniczenie prędkości w osi Y, aby statek nie leciał za szybko
+        float maxFlySpeed = 200.0f;
+        if (Math.abs(rb.velocity.y) > maxFlySpeed) {
+            rb.velocity.y = Math.signum(rb.velocity.y) * maxFlySpeed;
+        }
+    }
+
+    private void handleBallState() {
+        // Kula zmienia grawitację po kliknięciu, tylko gdy dotyka podłoża/sufitu
+        if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE) && onGround) {
+            gravityMultiplier *= -1;
+            rb.velocity.y = 0; // Mały "kop" w nowym kierunku
+            onGround = false;
+        }
+    }
+
+    private void handleUfoState() {
+        // UFO wykonuje mały podskok w powietrzu po każdym kliknięciu (jak Flappy Bird)
+        if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
+            rb.velocity.y = Constants.JUMP_FORCE * 0.8f * gravityMultiplier; // Nieco słabszy skok
+        }
+    }
+
+    private void handleWaveState(double dt) {
+        // Wave porusza się po linii prostej i nie podlega grawitacji. Zmienia kierunek po kliknięciu.
+        rb.velocity.y = 0; // Wyłączamy grawitację dla tego trybu
+        float waveSpeedY = 350.0f;
+
+        if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
+            // Ruch w górę (lub w dół, jeśli grawitacja jest odwrócona)
+            gameObject.transform.position.y += waveSpeedY * gravityMultiplier * dt;
+        } else {
+            // Ruch w dół (lub w górę...)
+            gameObject.transform.position.y -= waveSpeedY * gravityMultiplier * dt;
+        }
     }
     private void addJumpForce()
     {
@@ -136,6 +225,9 @@ public class Player extends Component {
         }
 
     }
+    public void setSpeed(Speed speed) { /* implementacja zmiany prędkości */ }
+    public void setMirrored(boolean isMirrored) { /* implementacja lustrzanego odbicia */ }
+    public void setMini(boolean isMini) { /* implementacja zmniejszonego rozmiaru */ }
     @Override
     public Component copy() {
         return null;

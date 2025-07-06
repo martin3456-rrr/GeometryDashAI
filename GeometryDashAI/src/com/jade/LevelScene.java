@@ -3,8 +3,9 @@ package com.jade;
 import com.Component.*;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
-import com.manager.Difficulty;
-import com.manager.DifficultyManager;
+import com.Generator.GeneratedLevelLoader;
+import com.Generator.GeneticLevelGenerator;
+import com.Generator.LevelChromosome;
 import com.util.Constants;
 import com.util.Vector2;
 
@@ -17,23 +18,30 @@ public class LevelScene extends Scene {
     public GameObject player;
     public BoxBounds playerBounds;
     private Ground ground;
-    private LevelGenerator levelGenerator;
     private String levelId;
     private List<GameObject> obstaclesToRemove = new ArrayList<>();
 
-    public LevelScene(String name) {
+    public LevelScene(String name, String levelId) {
         super.Scene(name);
+        this.levelId = levelId;
     }
     @Override
     public void init() {
-        this.levelId = levelId;
         initAssetPool();
-        Difficulty difficulty = DifficultyManager.getInstance().getDifficultyForLevel(levelId);
         initPlayer();
         initBackgroundsAndGround();
+        GeneticLevelGenerator generator = new GeneticLevelGenerator();
+        LevelChromosome bestLevel = generator.generateBestLevel();
+        GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
+
+        List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
+        for (GameObject obj : levelObjects) {
+            addGameObject(obj);
+        }
         updateCameraPosition();
-        levelGenerator = new LevelGenerator(difficulty);
+
     }
+
 
     private void initPlayer() {
         float x = 120.0f;
@@ -100,7 +108,6 @@ public class LevelScene extends Scene {
         AssertPool.addSpritesheet("assets/bigSprites.png",84,84,2,2,2);
         AssertPool.addSpritesheet("assets/smallBlocks.png",42,42,2,6,1);
         AssertPool.addSpritesheet("assets/portal.png",44,85,2,2,2);
-
     }
 
     @Override
@@ -112,14 +119,13 @@ public class LevelScene extends Scene {
         Player pc = player.getComponent(Player.class);
         if (pc != null) pc.onGround = false;
 
-        if (levelGenerator != null) {
-            levelGenerator.update(dt);
-        }
 
         Iterator<GameObject> it = gameObject.iterator();
         while (it.hasNext()) {
             GameObject go = it.next();
-            if (go == player) continue;
+            if (go == player) {
+                continue;
+            }
             go.update(dt);
 
             Bounds b = go.getComponent(Bounds.class);
@@ -128,10 +134,11 @@ public class LevelScene extends Scene {
             }
 
             if (go.transform.position.x + Constants.TILE_WIDTH < camera.position.x - Constants.TILE_WIDTH * 5
-                    && !go.isUI && go != player) {
-                obstaclesToRemove.add(go);
+                    && !go.isUI) {
+                removeGameObject(go);
             }
         }
+        processModifications();
 
         for (GameObject go : obstaclesToRemove) {
             removeGameObject(go);
@@ -145,6 +152,7 @@ public class LevelScene extends Scene {
             }
             objsRemove.clear();
         }
+
     }
 
     private void updateCameraPosition() {

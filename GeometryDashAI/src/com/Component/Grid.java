@@ -42,6 +42,15 @@ public class Grid extends Component {
             }
         }
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
         return null;

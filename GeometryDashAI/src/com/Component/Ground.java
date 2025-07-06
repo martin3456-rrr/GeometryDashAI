@@ -34,6 +34,14 @@ public class Ground extends Component {
                 Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
     }
 
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
         return this;

@@ -28,6 +28,14 @@ public class CameraControls extends Component {
         prevMy = Window.getWindow().MouseListener.y + Window.getWindow().MouseListener.dy;
     }
 
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public Component copy() {
         return null;

@@ -31,6 +31,13 @@ public class TriangleBounds extends Bounds{
     {
         calculateTransform();
     }
+
+
+    @Override
+    public void update(float dt) {
+
+    }
+
     public static boolean checkCollision(BoxBounds b1, TriangleBounds t2)
     {
         if(t2.broadPhase(b1))

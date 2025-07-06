@@ -16,6 +16,9 @@ public abstract class Component<T>{
     {
         return;
     }
+
+    public abstract void update(float dt);
+
     public abstract Component copy();
 
 }

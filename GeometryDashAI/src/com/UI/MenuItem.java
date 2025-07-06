@@ -35,6 +35,15 @@ public class MenuItem extends Component {
         this.bufferX = (int)((this.width/2.0)-(myImage.width/2.0));
         this.bufferY = (int)((this.height/2.0)-(myImage.height/2.0));
     }
+
+    /**
+     * @param dt
+     */
+    @Override
+    public void update(float dt) {
+
+    }
+
     @Override
     public void update(double dt)
     {

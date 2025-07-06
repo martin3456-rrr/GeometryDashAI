@@ -49,7 +49,7 @@ public class Window extends JFrame implements Runnable {
                 currentScene.init();
                 break;
             case 1:
-                currentScene = new LevelScene("Level");
+                currentScene = new LevelScene("Level","Stereo Madness");
                 currentScene.init();
                 break;
             default:
