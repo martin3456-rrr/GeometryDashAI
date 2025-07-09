@@ -144,7 +144,7 @@ public class LevelControls extends Component {
         {
             wasDragged = false;
             clearSelected();
-            LevelScene scene = (LevelScene) Window.getScene();
+            Window.getScene();
             List<GameObject> objs = boxCast(dragX,dragY,dragWidth,dragHeight);
             for(GameObject go : objs)
             {
@@ -320,15 +320,6 @@ public class LevelControls extends Component {
 
         }
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public Component copy() {
         return null;

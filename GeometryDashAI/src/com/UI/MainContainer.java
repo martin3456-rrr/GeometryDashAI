@@ -168,15 +168,6 @@ public class MainContainer extends Component {
 
         }
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public void update(double dt)
     {

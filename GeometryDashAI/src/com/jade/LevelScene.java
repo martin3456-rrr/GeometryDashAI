@@ -6,6 +6,7 @@ import com.dataStructure.Transform;
 import com.Generator.GeneratedLevelLoader;
 import com.Generator.GeneticLevelGenerator;
 import com.Generator.LevelChromosome;
+import com.manager.AudioManager;
 import com.util.Constants;
 import com.util.Vector2;
 
@@ -17,19 +18,17 @@ import java.util.List;
 public class LevelScene extends Scene {
     public GameObject player;
     public BoxBounds playerBounds;
-    private Ground ground;
-    private String levelId;
-    private List<GameObject> obstaclesToRemove = new ArrayList<>();
 
     public LevelScene(String name, String levelId) {
         super.Scene(name);
-        this.levelId = levelId;
     }
     @Override
     public void init() {
         initAssetPool();
+        initAudioManager();
         initPlayer();
         initBackgroundsAndGround();
+
         GeneticLevelGenerator generator = new GeneticLevelGenerator();
         LevelChromosome bestLevel = generator.generateBestLevel();
         GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
@@ -38,11 +37,13 @@ public class LevelScene extends Scene {
         for (GameObject obj : levelObjects) {
             addGameObject(obj);
         }
-        updateCameraPosition();
-
     }
-
-
+    private void initAudioManager() {
+        AudioManager.addSound("jump", "assets/sounds/jump.wav");
+        AudioManager.addSound("death", "assets/sounds/death.wav");
+        AudioManager.addSound("levelMusic", "assets/music/level1.wav");
+        AudioManager.loop("levelMusic");
+    }
     private void initPlayer() {
         float x = 120.0f;
         float y = Constants.GROUND_Y - Constants.PLAYER_HEIGHT ;
@@ -135,24 +136,10 @@ public class LevelScene extends Scene {
 
             if (go.transform.position.x + Constants.TILE_WIDTH < camera.position.x - Constants.TILE_WIDTH * 5
                     && !go.isUI) {
-                removeGameObject(go);
+                it.remove();
+                renderer.remove(go);
             }
         }
-        processModifications();
-
-        for (GameObject go : obstaclesToRemove) {
-            removeGameObject(go);
-        }
-        obstaclesToRemove.clear();
-
-        if (!objsRemove.isEmpty()) {
-            for (GameObject dead : objsRemove) {
-                gameObject.remove(dead);
-                renderer.remove(dead);
-            }
-            objsRemove.clear();
-        }
-
     }
 
     private void updateCameraPosition() {

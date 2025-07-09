@@ -73,15 +73,6 @@ public class Sprite extends Component {
 
         g2.setComposite(originalComposite);
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public Component copy() {
         Sprite newSprite;

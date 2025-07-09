@@ -2,6 +2,7 @@ package com.Component;
 
 import com.dataStructure.AssertPool;
 import com.jade.Component;
+import com.manager.AudioManager;
 import com.util.Constants;
 import com.jade.Window;
 
@@ -11,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 
 public class Player extends Component {
-    public enum Speed { SLOW, NORMAL, FAST }
     Sprite layerOne,layerTwo,layerThree,spaceship;
     public int width,height;
     public Rigidbody rb;
@@ -57,15 +57,6 @@ public class Player extends Component {
     public void start() {
         this.rb = gameObject.getComponent(Rigidbody.class);
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public void update(double dt)
     {
@@ -113,7 +104,7 @@ public class Player extends Component {
         else if(this.state !=PlayerState.FLYING)
         {
             gameObject.transform.rotation = (int)gameObject.transform.rotation % 360;
-            if(gameObject.transform.rotation > 180 && gameObject.transform.rotation < 360)
+            if(gameObject.transform.rotation > 180)
             {
                 gameObject.transform.rotation = 0;
             }
@@ -133,7 +124,7 @@ public class Player extends Component {
 
     private void handleFlyingState(double dt) { // Dodaj parametr dt
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
-            rb.velocity.y += Constants.FLY_FORCE * gravityMultiplier * dt;
+            rb.velocity.y += (float) (Constants.FLY_FORCE * gravityMultiplier * dt);
         }
         // Ograniczenie prędkości w osi Y, aby statek nie leciał za szybko
         float maxFlySpeed = 200.0f;
@@ -174,6 +165,7 @@ public class Player extends Component {
     private void addJumpForce()
     {
         gameObject.getComponent(Rigidbody.class).velocity.y = Constants.JUMP_FORCE;
+        AudioManager.play("jump");
     }
     private void addFlyForce()
     {
@@ -183,6 +175,7 @@ public class Player extends Component {
     {
         gameObject.transform.position.x = 500;
         gameObject.transform.position.y = 350;
+        AudioManager.play("death");
         gameObject.getComponent(Rigidbody.class).velocity.y = 0;
         gameObject.transform.rotation = 0;
         Window.getWindow().getCurrentScene().camera.position.x = 0;
@@ -225,9 +218,7 @@ public class Player extends Component {
         }
 
     }
-    public void setSpeed(Speed speed) { /* implementacja zmiany prędkości */ }
-    public void setMirrored(boolean isMirrored) { /* implementacja lustrzanego odbicia */ }
-    public void setMini(boolean isMini) { /* implementacja zmniejszonego rozmiaru */ }
+
     @Override
     public Component copy() {
         return null;

@@ -3,27 +3,24 @@ package com.Generator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class LevelChromosome {
-    private final List<GeneType> genes;
+    private final List<Pattern> patterns;
     private double fitness = 0.0;
 
-    public LevelChromosome(int length) {
-        this.genes = new ArrayList<>(length);
-
-        for (int i = 0; i < length; i++) {
-            this.genes.add(GeneType.values()[(int) (Math.random() * GeneType.values().length)]);
-        }
+    public LevelChromosome(List<Pattern> patterns) {
+        this.patterns = new ArrayList<>(patterns);
     }
-
-    public LevelChromosome(List<GeneType> genes) {
-        this.genes = new ArrayList<>(genes);
-    }
-
     public List<GeneType> getGenes() {
-        return Collections.unmodifiableList(genes);
+        List<GeneType> allGenes = patterns.stream()
+                .flatMap(pattern -> pattern.getGenes().stream())
+                .collect(Collectors.toList());
+        return Collections.unmodifiableList(allGenes);
     }
-
+    public List<Pattern> getPatterns() {
+        return this.patterns;
+    }
     public double getFitness() {
         return fitness;
     }
@@ -32,7 +29,11 @@ public class LevelChromosome {
         this.fitness = fitness;
     }
 
-    public int getLength() {
-        return genes.size();
+    public int getLengthInGenes() {
+        return patterns.stream().mapToInt(Pattern::getLength).sum();
+    }
+
+    public int getLengthInPatterns() {
+        return patterns.size();
     }
 }

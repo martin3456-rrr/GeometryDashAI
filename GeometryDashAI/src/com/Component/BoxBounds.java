@@ -39,21 +39,11 @@ public class BoxBounds extends Bounds {
     public void start() {
         this.calculateCenter();
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     public void calculateCenter() {
         this.center.x = this.gameObject.transform.position.x + this.halfWidth + this.xBuffer;
         this.center.y = this.gameObject.transform.position.y + this.halfHeight + this.yBuffer;
 
     }
-
     public static boolean checkCollision(BoxBounds b1, BoxBounds b2) {
         b1.calculateCenter();
         b2.calculateCenter();

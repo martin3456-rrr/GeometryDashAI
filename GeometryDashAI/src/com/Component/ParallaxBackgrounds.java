@@ -83,15 +83,6 @@ public class ParallaxBackgrounds extends Component {
             g2.fillRect((int)this.gameObject.transform.position.x,height,width,Constants.SCREEN_HEIGHT);
         }
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public Component copy() {
         return null;

@@ -33,15 +33,6 @@ public class Ground extends Component {
         g2.drawRect((int)gameObject.transform.position.x,(int)gameObject.transform.position.y,
                 Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
     }
-
-    /**
-     * @param dt
-     */
-    @Override
-    public void update(float dt) {
-
-    }
-
     @Override
     public Component copy() {
         return this;

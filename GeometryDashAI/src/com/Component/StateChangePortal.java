@@ -32,9 +32,8 @@ public class StateChangePortal extends Component {
             this.player = levelScene.player;
         }
     }
-
     @Override
-    public void update(float dt) {
+    public void update(double dt) {
         GameObject playerObj = Window.getScene().player;
         if (playerObj != null && triggerBounds != null && BoxBounds.checkCollision(triggerBounds, playerObj.getComponent(BoxBounds.class))) {
             Player player = playerObj.getComponent(Player.class);

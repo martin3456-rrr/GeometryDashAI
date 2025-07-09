@@ -6,7 +6,7 @@ import com.jade.Window;
 import com.util.Constants;
 import java.awt.event.KeyEvent;
 
-public  class JumpPad extends Component {
+public class JumpPad extends Component {
     public enum PadType {
         YELLOW_PAD, // Wyższy skok, automatyczny
         BLUE_PAD,   // Niższy skok, automatyczny
@@ -50,7 +50,7 @@ public  class JumpPad extends Component {
     }
 
     @Override
-    public void update(float dt) {
+    public void update(double dt) {
         GameObject player = Window.getScene().getAllGameObjects().stream()
                 .filter(go -> go.getComponent(Player.class) != null)
                 .findFirst().orElse(null);
