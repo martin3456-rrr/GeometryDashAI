@@ -65,7 +65,6 @@ public class StateChangePortal extends Component {
                 case MIRROR_ON: Window.getScene().setMirrored(true); break;
                 case MIRROR_OFF: Window.getScene().setMirrored(false); break;
             }
-            // Portal działa tylko raz
             this.gameObject.removeComponent(StateChangePortal.class);
         }
     }

@@ -47,42 +47,10 @@ public abstract class Scene {
         }
     }
 
-    private void addPendingObjects() {
-        for (GameObject g : objsToAdd) {
-            gameObject.add(g);
-            g.setScene(this); // Set scene reference
-            renderer.submit(g);
-            for (Component c : g.getAllComponents()) {
-                c.start();
-            }
-        }
-        objsToAdd.clear();
-    }
-
-    private void removePendingObjects() {
-        for (GameObject go : objsRemove) {
-            gameObject.remove(go);
-            renderer.remove(go);
-        }
-        objsRemove.clear();
-    }
-
-    protected void processModifications() {
-        if (!pendingModifications) {
-            return;
-        }
-
-        addPendingObjects();
-        removePendingObjects();
-
-        pendingModifications = false;
-    }
-
     public void setMirrored(boolean mirrored) {
         this.mirrored = mirrored;
 
     }
-
     public abstract void update(double dt);
     public abstract void draw(Graphics2D g2);
     protected Iterator<GameObject> getGameObjectIterator() {

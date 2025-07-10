@@ -60,21 +60,20 @@ public class MenuScene extends Scene {
         }
         Vector2 mousePos = new Vector2(mouseListener.x, mouseListener.y);
 
-        if (startGameButton != null && startGameButton.contains(mousePos.x, mousePos.y)) { // Sprawdzenie null
+        if (startGameButton != null && startGameButton.contains(mousePos.x, mousePos.y)) {
             if ((mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1)) {
-                String selectedLevel = "Level 1"; // Tymczasowo hardkodowane
-                System.out.println("Starting level: " + selectedLevel);
+                Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
+                Window.levelToLoad = "stereo_madness";
+                System.out.println("Starting original level: " + Window.levelToLoad);
                 Window.getWindow().changeScene(1);
                 mouseListener.mousePressed = false;
             }
-        } else if (exitButton != null && exitButton.contains(mousePos.x, mousePos.y)) { // Sprawdzenie null
+        } else if (exitButton != null && exitButton.contains(mousePos.x, mousePos.y)) {
             if (mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
                 Window.getWindow().close();
             }
         }
     }
-
-
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(new Color(50, 50, 100));

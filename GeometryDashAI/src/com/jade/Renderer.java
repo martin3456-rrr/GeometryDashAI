@@ -12,13 +12,11 @@ import java.util.Map;
 public class Renderer {
     Map<Integer,List<GameObject>> gameObjects;
     Camera camera;
-
     public Renderer(Camera camera)
     {
         this.camera = camera;
         this.gameObjects = new HashMap<>();
     }
-
     public void submit(GameObject gameObject)
     {
         gameObjects.computeIfAbsent(gameObject.zIndex,k -> new ArrayList<>());

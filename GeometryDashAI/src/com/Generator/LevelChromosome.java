@@ -28,12 +28,4 @@ public class LevelChromosome {
     public void setFitness(double fitness) {
         this.fitness = fitness;
     }
-
-    public int getLengthInGenes() {
-        return patterns.stream().mapToInt(Pattern::getLength).sum();
-    }
-
-    public int getLengthInPatterns() {
-        return patterns.size();
-    }
 }

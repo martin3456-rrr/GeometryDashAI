@@ -1,6 +1,7 @@
 package com.jade;
 
 import com.Component.*;
+import com.Generator.OriginalLevelLoader;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
 import com.Generator.GeneratedLevelLoader;
@@ -18,8 +19,7 @@ import java.util.List;
 public class LevelScene extends Scene {
     public GameObject player;
     public BoxBounds playerBounds;
-
-    public LevelScene(String name, String levelId) {
+    public LevelScene(String name) {
         super.Scene(name);
     }
     @Override
@@ -29,19 +29,27 @@ public class LevelScene extends Scene {
         initPlayer();
         initBackgroundsAndGround();
 
-        GeneticLevelGenerator generator = new GeneticLevelGenerator();
-        LevelChromosome bestLevel = generator.generateBestLevel();
-        GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
-
-        List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
-        for (GameObject obj : levelObjects) {
-            addGameObject(obj);
+        if (Window.selectedMode == Window.GameMode.ORIGINAL_LEVEL) {
+            System.out.println("Loading original level: " + Window.levelToLoad);
+            OriginalLevelLoader loader = new OriginalLevelLoader();
+            List<GameObject> levelObjects = loader.loadLevel(Window.levelToLoad);
+            for (GameObject obj : levelObjects) {
+                addGameObject(obj);
+            }
+        } else {
+            System.out.println("Generating new level with AI...");
+            GeneticLevelGenerator generator = new GeneticLevelGenerator();
+            LevelChromosome bestLevel = generator.generateBestLevel();
+            GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
+            List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
+            for (GameObject obj : levelObjects) {
+                addGameObject(obj);
+            }
         }
     }
     private void initAudioManager() {
         AudioManager.addSound("jump", "assets/sounds/jump.wav");
         AudioManager.addSound("death", "assets/sounds/death.wav");
-        AudioManager.addSound("levelMusic", "assets/music/level1.wav");
         AudioManager.loop("levelMusic");
     }
     private void initPlayer() {
@@ -60,7 +68,6 @@ public class LevelScene extends Scene {
             Player playerComp = new Player(layerOne.sprite.getFirst(), layerTwo.sprite.getFirst(), layerThree.sprite.getFirst(), Color.RED, Color.GREEN);
             player.addComponent(playerComp);
         }
-
         player.addComponent(new Rigidbody(new Vector2(Constants.PLAYER_SPEED, 0)));
         playerBounds = new BoxBounds(Constants.PLAYER_WIDTH , Constants.PLAYER_HEIGHT );
         player.addComponent(playerBounds);
@@ -141,7 +148,6 @@ public class LevelScene extends Scene {
             }
         }
     }
-
     private void updateCameraPosition() {
         if(player.transform.position.x - camera.position.x>Constants.CAMERA_OFFSET_X)
         {
@@ -152,9 +158,7 @@ public class LevelScene extends Scene {
         {
             camera.position.y = Constants.CAMERA_OFFSET_GROUND_Y;
         }
-
     }
-
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(Constants.BG_COLOR);

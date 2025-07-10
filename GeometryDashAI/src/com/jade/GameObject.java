@@ -99,12 +99,4 @@ public class GameObject {
      public String getName() {
         return this.name;
      }
-
-     public Scene getScene() {
-         return this.scene;
-     }
-
-     public void setScene(Scene scene) {
-         this.scene = scene;
-     }
 }

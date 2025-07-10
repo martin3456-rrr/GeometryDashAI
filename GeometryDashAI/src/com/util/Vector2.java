@@ -18,10 +18,4 @@ public class Vector2 {
     {
         return new Vector2(this.x,this.y);
     }
-
-    public float distance(Vector2 other) {
-        float dx = this.x - other.x;
-        float dy = this.y - other.y;
-        return (float) Math.sqrt(dx * dx + dy * dy);
-    }
 }

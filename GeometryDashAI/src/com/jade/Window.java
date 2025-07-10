@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import java.awt.*;
 
 public class Window extends JFrame implements Runnable {
+    public enum GameMode { AI_GENERATED, ORIGINAL_LEVEL }
     public ML MouseListener;
     public KL keyLister;
     public boolean isInEditor = false;
@@ -15,6 +16,8 @@ public class Window extends JFrame implements Runnable {
     private Scene currentScene = null;
     private Image doubleBufferImage = null;
     private Graphics doubleBufferGraphics = null;
+    public static GameMode selectedMode = GameMode.AI_GENERATED;
+    public static String levelToLoad = "stereo_madness";
     public Window()
     {
         this.MouseListener = new ML();
@@ -46,7 +49,7 @@ public class Window extends JFrame implements Runnable {
                 currentScene.init();
                 break;
             case 1:
-                currentScene = new LevelScene("Level","Stereo Madness");
+                currentScene = new LevelScene("Level");
                 currentScene.init();
                 break;
             default:

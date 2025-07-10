@@ -8,9 +8,7 @@ public class FitnessCalculator {
     private static final double PLAYABILITY_SCORE = 200.0;
     private static final double PENALTY_DEATH = -50.0;
     private static final double MARKOV_FLOW_BONUS = 75.0; // Zwiększony bonus
-
     private final Map<PlayerState, MarkovChain> chains;
-
     public FitnessCalculator(Map<PlayerState, MarkovChain> chains) {
         this.chains = chains;
     }
@@ -29,13 +27,45 @@ public class FitnessCalculator {
         score += calculateVarietyBonus(level);
         score += calculateFlowScore(level);
         score += calculateMarkovFlowBonus(level);
+        score += rewardForOriginalFlow(level);
+        score -= penalizePatternRepetition(level);
 
         level.setFitness(Math.max(0, score));
     }
+    private double rewardForOriginalFlow(LevelChromosome level) {
+        double bonus = 0.0;
+        List<Pattern> patterns = level.getPatterns();
+        List<String> originalSequence = PatternLibrary.getOriginalLevels().get("stereo_madness");
 
-    /**
-     * Ocenia płynność poziomu na podstawie hierarchicznych modeli Markowa 2. rzędu.
-     */
+        if (originalSequence == null || patterns.size() < 2) {
+            return 0;
+        }
+
+        for (int i = 0; i < patterns.size() - 1; i++) {
+            String p1 = patterns.get(i).getName();
+            String p2 = patterns.get(i + 1).getName();
+            for (int j = 0; j < originalSequence.size() - 1; j++) {
+                if (originalSequence.get(j).equals(p1) && originalSequence.get(j + 1).equals(p2)) {
+                    bonus += 20.0;
+                    break;
+                }
+            }
+        }
+        return bonus;
+    }
+
+    private double penalizePatternRepetition(LevelChromosome level) {
+        double penalty = 0.0;
+        List<Pattern> patterns = level.getPatterns();
+        if (patterns.size() < 2) return 0;
+
+        for (int i = 0; i < patterns.size() - 1; i++) {
+            if (patterns.get(i).getName().equals(patterns.get(i+1).getName())) {
+                penalty += 30.0;
+            }
+        }
+        return penalty;
+    }
     private double calculateMarkovFlowBonus(LevelChromosome level) {
         double bonus = 0.0;
         List<Pattern> patterns = level.getPatterns();
@@ -44,13 +74,11 @@ public class FitnessCalculator {
         PlayerState currentState = PlayerState.NORMAL;
         MarkovChain currentChain = chains.get(currentState);
 
-        // Sprawdź pierwsze przejście
         List<String> markovState = List.of(MarkovChain.START_TOKEN, patterns.get(0).getName());
         if (currentChain.isKnownTransition(markovState, patterns.get(1).getName())) {
             bonus += 5;
         }
 
-        // Sprawdź resztę przejść
         for (int i = 0; i < patterns.size() - 2; i++) {
             Pattern p1 = patterns.get(i);
             Pattern p2 = patterns.get(i + 1);
@@ -67,7 +95,6 @@ public class FitnessCalculator {
         return Math.min(bonus, MARKOV_FLOW_BONUS);
     }
 
-    // Ten helper musi być dostępny tutaj, aby poprawnie oceniać płynność
     private PlayerState getPlayerStateAfterPattern(Pattern pattern, PlayerState currentState) {
         for (GeneType gene : pattern.getGenes()) {
             switch(gene) {
@@ -78,9 +105,6 @@ public class FitnessCalculator {
         }
         return currentState;
     }
-
-    // Reszta metod bez zmian (checkPlayability, calculateDifficultyScore, etc.)
-    // ...
     private double checkPlayability(LevelChromosome level) {
         List<GeneType> genes = level.getGenes();
         PlayerState botState = PlayerState.NORMAL;
@@ -223,7 +247,6 @@ public class FitnessCalculator {
             GeneType current = genes.get(i);
             GeneType next = genes.get(i + 1);
             GeneType afterNext = genes.get(i + 2);
-            // Zmiana stanu w trakcie analizy flow
             if (current == GeneType.PORTAL_SHIP) currentState = PlayerState.FLYING;
             if (current == GeneType.PORTAL_NORMAL) currentState = PlayerState.NORMAL;
 
