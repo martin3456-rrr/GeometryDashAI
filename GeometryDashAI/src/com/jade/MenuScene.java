@@ -11,11 +11,15 @@ import com.util.Vector2;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 
 public class MenuScene extends Scene {
     private Rectangle startGameButton;
     private Rectangle exitButton;
     private ML mouseListener;
+    private long lastKeyPress = 0;
+    private final long KEY_DELAY = 200; // 200ms opóźnienie
+
 
     public MenuScene(String name) {
         super.Scene(name);
@@ -55,6 +59,22 @@ public class MenuScene extends Scene {
 
     @Override
     public void update(double dt) {
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastKeyPress > KEY_DELAY) {
+            if (Window.keyListener().IsKeyPressed(KeyEvent.VK_LEFT) ||
+                    Window.keyListener().IsKeyPressed(KeyEvent.VK_UP)) {
+                Window.previousLevel();
+                lastKeyPress = currentTime;
+            }
+
+            if (Window.keyListener().IsKeyPressed(KeyEvent.VK_RIGHT) ||
+                    Window.keyListener().IsKeyPressed(KeyEvent.VK_DOWN)) {
+                Window.nextLevel();
+                lastKeyPress = currentTime;
+            }
+        }
+
         for (GameObject go : gameObject) {
             go.update(dt);
         }
@@ -63,7 +83,6 @@ public class MenuScene extends Scene {
         if (startGameButton != null && startGameButton.contains(mousePos.x, mousePos.y)) {
             if ((mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1)) {
                 Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
-                Window.levelToLoad = "stereo_madness";
                 System.out.println("Starting original level: " + Window.levelToLoad);
                 Window.getWindow().changeScene(1);
                 mouseListener.mousePressed = false;
@@ -78,11 +97,11 @@ public class MenuScene extends Scene {
     public void draw(Graphics2D g2) {
         g2.setColor(new Color(50, 50, 100));
         g2.fillRect(0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-
         renderer.render(g2);
-
         drawButton(g2, startGameButton, "Start Game");
         drawButton(g2, exitButton, "Exit");
+
+
     }
     private void drawButton(Graphics2D g2, Rectangle buttonRect, String text) {
         boolean hovered = buttonRect.contains(mouseListener.x, mouseListener.y);

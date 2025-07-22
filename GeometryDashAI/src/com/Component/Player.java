@@ -20,6 +20,10 @@ public class Player extends Component {
     public float gravityMultiplier = 1.0f;
     public float speedMultiplier = 1.0f;
     public float scaleMultiplier = 1.0f;
+    public boolean isDead = false;
+    public static boolean inSimulation = false;
+
+
     public Player(Sprite layerOne, Sprite layerTwo, Sprite layerThree, Color colorOne, Color colorTwo)
     {
         this.spaceship = AssertPool.getSprite("assets/player/spaceship.png");
@@ -29,20 +33,20 @@ public class Player extends Component {
         this.layerTwo=layerTwo;
         this.layerThree=layerThree;
         this.state = PlayerState.NORMAL;
-       int threshold = 200;
-       for(int y= 0;y<layerOne.image.getWidth();y++)
-       {
-           for(int x = 0;x<layerOne.image.getHeight();x++)
-           {
-               Color color = new Color(layerOne.image.getRGB(x,y));
-               if(color.getRed()>threshold && color.getGreen()>threshold && color.getBlue()>threshold)
-               {
-                  layerOne.image.setRGB(x,y,colorOne.getRGB());
-               }
-           }
-       }
-       for(int y= 0;y<layerTwo.image.getWidth();y++)
-       {
+        int threshold = 200;
+        for(int y= 0;y<layerOne.image.getWidth();y++)
+        {
+            for(int x = 0;x<layerOne.image.getHeight();x++)
+            {
+                Color color = new Color(layerOne.image.getRGB(x,y));
+                if(color.getRed()>threshold && color.getGreen()>threshold && color.getBlue()>threshold)
+                {
+                    layerOne.image.setRGB(x,y,colorOne.getRGB());
+                }
+            }
+        }
+        for(int y= 0;y<layerTwo.image.getWidth();y++)
+        {
             for(int x = 0;x<layerTwo.image.getHeight();x++)
             {
                 Color color = new Color(layerTwo.image.getRGB(x,y));
@@ -51,7 +55,7 @@ public class Player extends Component {
                     layerTwo.image.setRGB(x,y,colorTwo.getRGB());
                 }
             }
-       }
+        }
     }
     @Override
     public void start() {
@@ -60,7 +64,7 @@ public class Player extends Component {
     @Override
     public void update(double dt)
     {
-        // Zastosuj prędkość
+        // Ta logika pozostaje bez zmian
         gameObject.transform.position.x += (float)(Constants.PLAYER_SPEED * speedMultiplier * dt);
 
         switch (state) {
@@ -68,7 +72,7 @@ public class Player extends Component {
                 handleNormalState();
                 break;
             case FLYING:
-                handleFlyingState(dt); // Przekaż dt jako parametr
+                handleFlyingState(dt);
                 break;
             case BALL:
                 handleBallState();
@@ -83,7 +87,7 @@ public class Player extends Component {
 
         gameObject.transform.scale.x = scaleMultiplier;
         gameObject.transform.scale.y = scaleMultiplier * gravityMultiplier;
-        
+
         if(onGround && Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE))
         {
             if(state == PlayerState.NORMAL)
@@ -115,6 +119,20 @@ public class Player extends Component {
         }
     }
 
+    public void die()
+    {
+        this.isDead = true;
+        if (!inSimulation) {
+            gameObject.transform.position.x = 500;
+            gameObject.transform.position.y = 350;
+            AudioManager.play("death");
+            gameObject.getComponent(Rigidbody.class).velocity.y = 0;
+            gameObject.transform.rotation = 0;
+            Window.getWindow().getCurrentScene().camera.position.x = 0;
+            state = PlayerState.NORMAL;
+        }
+    }
+
     private void handleNormalState() {
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE) && onGround) {
             rb.velocity.y = Constants.JUMP_FORCE * gravityMultiplier;
@@ -122,11 +140,10 @@ public class Player extends Component {
         }
     }
 
-    private void handleFlyingState(double dt) { // Dodaj parametr dt
+    private void handleFlyingState(double dt) {
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
             rb.velocity.y += (float) (Constants.FLY_FORCE * gravityMultiplier * dt);
         }
-        // Ograniczenie prędkości w osi Y, aby statek nie leciał za szybko
         float maxFlySpeed = 200.0f;
         if (Math.abs(rb.velocity.y) > maxFlySpeed) {
             rb.velocity.y = Math.signum(rb.velocity.y) * maxFlySpeed;
@@ -134,52 +151,39 @@ public class Player extends Component {
     }
 
     private void handleBallState() {
-        // Kula zmienia grawitację po kliknięciu, tylko gdy dotyka podłoża/sufitu
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE) && onGround) {
             gravityMultiplier *= -1;
-            rb.velocity.y = 0; // Mały "kop" w nowym kierunku
+            rb.velocity.y = 0;
             onGround = false;
         }
     }
 
     private void handleUfoState() {
-        // UFO wykonuje mały podskok w powietrzu po każdym kliknięciu (jak Flappy Bird)
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
-            rb.velocity.y = Constants.JUMP_FORCE * 0.8f * gravityMultiplier; // Nieco słabszy skok
+            rb.velocity.y = Constants.JUMP_FORCE * 0.8f * gravityMultiplier;
         }
     }
 
     private void handleWaveState(double dt) {
-        // Wave porusza się po linii prostej i nie podlega grawitacji. Zmienia kierunek po kliknięciu.
-        rb.velocity.y = 0; // Wyłączamy grawitację dla tego trybu
+        rb.velocity.y = 0;
         float waveSpeedY = 350.0f;
 
         if (Window.keyListener().IsKeyPressed(KeyEvent.VK_SPACE)) {
-            // Ruch w górę (lub w dół, jeśli grawitacja jest odwrócona)
-            gameObject.transform.position.y += waveSpeedY * gravityMultiplier * dt;
+            gameObject.transform.position.y += (float) (waveSpeedY * gravityMultiplier * dt);
         } else {
-            // Ruch w dół (lub w górę...)
-            gameObject.transform.position.y -= waveSpeedY * gravityMultiplier * dt;
+            gameObject.transform.position.y -= (float) (waveSpeedY * gravityMultiplier * dt);
         }
     }
     private void addJumpForce()
     {
         gameObject.getComponent(Rigidbody.class).velocity.y = Constants.JUMP_FORCE;
-        AudioManager.play("jump");
+        if (!inSimulation) {
+            AudioManager.play("jump");
+        }
     }
     private void addFlyForce()
     {
         gameObject.getComponent(Rigidbody.class).velocity.y = Constants.FLY_FORCE;
-    }
-    public void die()
-    {
-        gameObject.transform.position.x = 500;
-        gameObject.transform.position.y = 350;
-        AudioManager.play("death");
-        gameObject.getComponent(Rigidbody.class).velocity.y = 0;
-        gameObject.transform.rotation = 0;
-        Window.getWindow().getCurrentScene().camera.position.x = 0;
-        state = PlayerState.NORMAL;
     }
     @Override
     public void draw(Graphics2D g2)
@@ -218,7 +222,6 @@ public class Player extends Component {
         }
 
     }
-
     @Override
     public Component copy() {
         return null;

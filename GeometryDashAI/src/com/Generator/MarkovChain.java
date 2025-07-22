@@ -2,7 +2,7 @@ package com.Generator;
 
 import java.util.*;
 
-public class MarkovChain {
+public class MarkovChain implements ILevelGenerationModel {
     private final Map<List<String>, Map<String, Integer>> transitionCounts = new HashMap<>();
     private final Map<List<String>, Integer> stateTotals = new HashMap<>();
     private final Random random = new Random();
@@ -31,14 +31,14 @@ public class MarkovChain {
     }
 
     public Pattern getNextPattern(List<String> currentState) {
-        if (!transitionCounts.containsKey(currentState) || stateTotals.getOrDefault(currentState, 0) == 0) {
-            List<String> fallbackState = List.of(START_TOKEN, currentState.get(1));
-            if (transitionCounts.containsKey(fallbackState) && stateTotals.getOrDefault(fallbackState, 0) > 0) {
-                return getPatternFromState(fallbackState);
-            }
-            return PatternLibrary.getRandomPattern();
+        if (transitionCounts.containsKey(currentState) && stateTotals.getOrDefault(currentState, 0) > 0) {
+            return getPatternFromState(currentState);
         }
-        return getPatternFromState(currentState);
+        List<String> fallbackState = List.of(START_TOKEN, currentState.get(1));
+        if (isKnownTransition(fallbackState, fallbackState.get(1))) {
+            return getPatternFromState(fallbackState);
+        }
+        return PatternLibrary.getRandomPattern();
     }
 
     private Pattern getPatternFromState(List<String> state) {

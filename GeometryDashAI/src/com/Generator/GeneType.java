@@ -9,15 +9,14 @@ public enum GeneType {
     THREE_SPIKES_GROUND, // Grupa trzech kolców
     SPIKE_AIR,
     BLOCK_AIR,
+    BLOCK_SMALL,
+    BLOCK_BIG,
 
     PORTAL_SHIP,
     PORTAL_BALL,
-    PORTAL_WAVE,
     PORTAL_NORMAL,
     PORTAL_GRAVITY_UP,
-    PORTAL_GRAVITY_DOWN,
-    PORTAL_DUAL_GRAVITY,
-    FOG_EFFECT,
+    PORTAL_GRAVITY_DOWN
 
 
 }

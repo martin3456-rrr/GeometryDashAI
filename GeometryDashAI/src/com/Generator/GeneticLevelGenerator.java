@@ -1,74 +1,88 @@
 package com.Generator;
 
 import com.Component.PlayerState;
+
+import java.util.*;
+
 import com.manager.Difficulty;
+import com.manager.PluginLoader;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-enum LevelTheme {
-    JUMPING_SECTION,
-    SHIP_SECTION,
-    BALL_SECTION
-}
 public class GeneticLevelGenerator {
 
-    private final int populationSize = 100;
-    private final int targetLevelLength = 200;
-    private final double mutationRate = 0.05;
+    private final int populationSize = 300;
+    private final double mutationRate = 0.25;
     private final int tournamentSize = 5;
-    private final int maxGenerations = 9999;
+    private final int maxGenerations = 500;
+    private final AIPlaytester playtesterForMutation = new AIPlaytester();
+    private final ILevelGenerationModel lstmModel;
+    private final HybridLevelGenerator hybridGenerator;
 
     private List<LevelChromosome> population;
-    private final FitnessCalculator fitnessCalculator;
-
-    private final MarkovChain normalModeChain;
-    private final MarkovChain shipModeChain;
-    private final MarkovChain ballModeChain;
+    private final ILevelEvaluator fitnessCalculator;
+    private final Map<PlayerState, ILevelGenerationModel> generationModels;
+    private final List<ILevelGenerationModel> pluginModels;
 
     public GeneticLevelGenerator() {
-        this.normalModeChain = new MarkovChain();
-        this.shipModeChain = new MarkovChain();
-        this.ballModeChain = new MarkovChain();
+        ILevelGenerationModel normalModeChain = new MarkovChain();
+        ILevelGenerationModel shipModeChain = new MarkovChain();
+        ILevelGenerationModel ballModeChain = new MarkovChain();
+        this.hybridGenerator = new HybridLevelGenerator();
 
-        trainModels();
-
-        this.fitnessCalculator = new FitnessCalculator(Map.of(
+        this.generationModels = Map.of(
                 PlayerState.NORMAL, normalModeChain,
                 PlayerState.FLYING, shipModeChain,
                 PlayerState.BALL, ballModeChain
-        ));
+        );
 
-        this.population = initializePopulation();
+        trainModels();
+
+        this.lstmModel = new LstmLevelGenerator();
+        System.out.println("Rozpoczynanie wczytywania danych dla LSTM...");
+        List<Pattern> trainingData = TrainingDataAggregator.loadAllLevelsFromDirectory("data/community_levels"); // Użycie TrainingDataAggregator
+        if (!trainingData.isEmpty()) {
+            this.lstmModel.train(trainingData);
+        } else {
+            System.err.println("Brak danych treningowych dla LSTM, model nie będzie w pełni funkcjonalny.");
+        }
+
+        System.out.println("Wczytywanie zewnętrznych modeli generowania (pluginów)...");
+        this.pluginModels = PluginLoader.loadPlugins("plugins", ILevelGenerationModel.class);
+        if (this.pluginModels.isEmpty()) {
+            System.out.println("Nie znaleziono żadnych pluginów.");
+        }
+
+        this.fitnessCalculator = new FitnessCalculator();
     }
 
     private void trainModels() {
         Map<String, List<String>> originalLevels = PatternLibrary.getOriginalLevels();
-        List<String> stereoMadnessPatternNames = originalLevels.get("stereo_madness");
-
-        if (stereoMadnessPatternNames != null) {
-            List<Pattern> stereoMadnessPatterns = PatternLibrary.getPatternsFromNames(stereoMadnessPatternNames);
-            normalModeChain.train(stereoMadnessPatterns);
-            shipModeChain.train(stereoMadnessPatterns);
-            ballModeChain.train(stereoMadnessPatterns);
-        } else {
-            normalModeChain.train(PatternLibrary.PATTERNS);
-            shipModeChain.train(PatternLibrary.PATTERNS);
-            ballModeChain.train(PatternLibrary.PATTERNS);
+        for (Map.Entry<String, List<String>> levelEntry : originalLevels.entrySet()) {
+            List<String> patternNames = levelEntry.getValue();
+            
+            if (patternNames != null && !patternNames.isEmpty()) {
+                List<Pattern> levelPatterns = PatternLibrary.getPatternsFromNames(patternNames);
+                generationModels.get(PlayerState.NORMAL).train(levelPatterns);
+                generationModels.get(PlayerState.FLYING).train(levelPatterns);
+                generationModels.get(PlayerState.BALL).train(levelPatterns);
+            }
         }
     }
-    public LevelChromosome generateBestLevel() {
+    public LevelChromosome generateBestLevel(LevelGenerationConfig config) {
+        this.population = initializePopulation(config);
+
         for (int generation = 0; generation < maxGenerations; generation++) {
             for (LevelChromosome level : population) {
-                fitnessCalculator.calculateFitness(level);
+                fitnessCalculator.evaluateFitness(level, config);
             }
             population.sort(Comparator.comparingDouble(LevelChromosome::getFitness).reversed());
 
-            List<LevelChromosome> newPopulation = new ArrayList<>();
-            int eliteSize = (int) (populationSize * 0.1);
-            newPopulation.addAll(population.subList(0, eliteSize));
+            if (generation % 10 == 0) {
+                System.out.println("Generacja " + generation + ": Najlepszy Fitness = " + population.getFirst().getFitness());
+                System.out.println("Najlepszy poziom ma " + population.getFirst().getPatterns().size() + " wzorców");
+            }
+
+            int eliteSize = (int) (populationSize * 0.05);
+            List<LevelChromosome> newPopulation = new ArrayList<>(population.subList(0, eliteSize));
 
             for (int i = eliteSize; i < populationSize; i++) {
                 LevelChromosome parent1 = tournamentSelection();
@@ -80,153 +94,146 @@ public class GeneticLevelGenerator {
             population = newPopulation;
         }
 
-        return population.stream()
+        LevelChromosome bestLevel = population.stream()
                 .max(Comparator.comparing(LevelChromosome::getFitness))
                 .orElse(null);
+            
+        if (bestLevel != null) {
+            System.out.println("Wygenerowano najlepszy poziom z " + bestLevel.getPatterns().size() + " wzorców");
+        }
+        
+        return bestLevel;
     }
 
-    private List<LevelChromosome> initializePopulation() {
+    private List<LevelChromosome> initializePopulation(LevelGenerationConfig config) {
         List<LevelChromosome> newPopulation = new ArrayList<>();
         for (int i = 0; i < populationSize; i++) {
             List<Pattern> chromosomePatterns = new ArrayList<>();
-
-            List<LevelTheme> levelPlan = generateLevelPlan();
-
-            for (LevelTheme theme : levelPlan) {
-                chromosomePatterns.addAll(fillThemeWithPatterns(theme, targetLevelLength / levelPlan.size()));
-            }
-            int currentLength = 0;
-
             PlayerState currentPlayerState = PlayerState.NORMAL;
-            List<String> markovState = new ArrayList<>(List.of(MarkovChain.START_TOKEN, MarkovChain.START_TOKEN));
+            List<String> history = new ArrayList<>(List.of(MarkovChain.START_TOKEN, MarkovChain.START_TOKEN));
+            int currentLength = 0;
+            int maxAttempts = config.getTargetLength() * 5;
+            int attempts = 0;
+            int consecutiveFailures = 0;
 
-            while (currentLength < targetLevelLength) {
-                Difficulty targetDifficulty = getTargetDifficulty(currentLength, targetLevelLength);
-                MarkovChain currentChain = getChainForState(currentPlayerState);
-                Pattern nextPattern;
-                int attempts = 0;
-                do {
-                    nextPattern = currentChain.getNextPattern(markovState);
-                    attempts++;
-                } while ((isSequenceBad(chromosomePatterns, nextPattern) || nextPattern.getDifficulty() != targetDifficulty) && attempts < 20);
+            while (currentLength < config.getTargetLength() && attempts < maxAttempts) {
+                attempts++;
+                GenerationContext context = new GenerationContext(
+                        config.getTargetDifficulty().ordinal(),
+                        currentPlayerState,
+                        (int)((double)currentLength / config.getTargetLength() * 100)
+                );
+
+                Pattern nextPattern = hybridGenerator.getNextPattern(history, context);
+
+                if (nextPattern == null) {
+                    consecutiveFailures++;
+                    if (consecutiveFailures > 3) {
+                        nextPattern = PatternLibrary.getRandomPattern();
+                        consecutiveFailures = 0;
+                    }
+                    if (nextPattern == null) {
+                        nextPattern = new Pattern("Emergency", List.of(GeneType.EMPTY, GeneType.BLOCK_GROUND), Difficulty.EASY);
+                    }
+                } else {
+                    consecutiveFailures = 0;
+                }
 
                 chromosomePatterns.add(nextPattern);
                 currentLength += nextPattern.getLength();
-                markovState.remove(0);
-                markovState.add(nextPattern.getName());
+                history.add(nextPattern.getName());
+                if (history.size() > 2) history.removeFirst();
                 currentPlayerState = getPlayerStateAfterPattern(nextPattern, currentPlayerState);
             }
+
+            while (currentLength < config.getTargetLength() * 0.8) {
+                Pattern fillerPattern = getSimpleFillerPattern(currentPlayerState);
+                chromosomePatterns.add(fillerPattern);
+                currentLength += fillerPattern.getLength();
+                currentPlayerState = getPlayerStateAfterPattern(fillerPattern, currentPlayerState);
+            }
+            
+            System.out.println("Chromosome " + i + " created with " + chromosomePatterns.size() + 
+                             " patterns, total length: " + currentLength + " (target: " + config.getTargetLength() + ")");
             newPopulation.add(new LevelChromosome(chromosomePatterns));
         }
         return newPopulation;
     }
-    private List<LevelTheme> generateLevelPlan() {
-        List<LevelTheme> plan = new ArrayList<>();
-        plan.add(LevelTheme.JUMPING_SECTION);
-        plan.add(LevelTheme.SHIP_SECTION);
-        plan.add(LevelTheme.JUMPING_SECTION);
-        plan.add(LevelTheme.BALL_SECTION);
-        return plan;
+
+    private Pattern getSimpleFillerPattern(PlayerState state) {
+        List<Pattern> simplePatterns = PatternLibrary.PATTERNS.stream()
+                .filter(p -> p.getDifficulty() == Difficulty.EASY)
+                .filter(p -> isPatternCompatibleWithState(p, state))
+                .toList();
+    
+        if (simplePatterns.isEmpty()) {
+            return new Pattern("SimpleFiller", List.of(GeneType.EMPTY, GeneType.BLOCK_GROUND), Difficulty.EASY);
+        }
+
+        return simplePatterns.get(new Random().nextInt(simplePatterns.size()));
     }
 
-    private List<Pattern> fillThemeWithPatterns(LevelTheme theme, int targetLength) {
-        List<Pattern> segmentPatterns = new ArrayList<>();
-        int currentLength = 0;
-
-        PlayerState stateForTheme;
-        MarkovChain chainForTheme;
-
-        switch (theme) {
-            case SHIP_SECTION:
-                stateForTheme = PlayerState.FLYING;
-                chainForTheme = this.shipModeChain;
-                segmentPatterns.add(PatternLibrary.getPatternByName("PortalToShip"));
-                break;
-            case BALL_SECTION:
-                stateForTheme = PlayerState.BALL;
-                chainForTheme = this.ballModeChain;
-                segmentPatterns.add(PatternLibrary.getPatternByName("PortalToBall"));
-                break;
-            default:
-                stateForTheme = PlayerState.NORMAL;
-                chainForTheme = this.normalModeChain;
-                break;
-        }
-
-        List<String> markovState = new ArrayList<>(List.of(MarkovChain.START_TOKEN, MarkovChain.START_TOKEN));
-
-        while (currentLength < targetLength) {
-            Pattern nextPattern = chainForTheme.getNextPattern(markovState);
-            if (isPatternValidForState(nextPattern, stateForTheme)) {
-                segmentPatterns.add(nextPattern);
-                currentLength += nextPattern.getLength();
-                markovState.remove(0);
-                markovState.add(nextPattern.getName());
-            }
-        }
-        if (theme != LevelTheme.JUMPING_SECTION) {
-            segmentPatterns.add(PatternLibrary.getPatternByName("PortalToNormal"));
-        }
-
-        return segmentPatterns;
-    }
-
-    private boolean isPatternValidForState(Pattern pattern, PlayerState state) {
-        boolean hasPortal = pattern.getGenes().stream().anyMatch(g -> g.name().contains("PORTAL"));
-        if (state == PlayerState.NORMAL) {
-            return !hasPortal && !pattern.getName().contains("Ship") && !pattern.getName().contains("Ball");
-        }
-        return true;
-    }
-    private Difficulty getTargetDifficulty(int currentLength, int totalLength) {
-        double progress = (double) currentLength / totalLength;
-        if (progress < 0.33) return Difficulty.EASY;
-        if (progress < 0.66) return Difficulty.MEDIUM;
-        return Difficulty.HARD;
-    }
-
-    private boolean isSequenceBad(List<Pattern> existingPatterns, Pattern nextPattern) {
-        if (existingPatterns.isEmpty()) return false;
-        Pattern lastPattern = existingPatterns.getLast();
-        if (lastPattern.getDifficulty() == Difficulty.EASY && nextPattern.getDifficulty() == Difficulty.HARD) {
-            return true;
-        }
-        if (lastPattern.getDifficulty() == Difficulty.HARD && nextPattern.getDifficulty() == Difficulty.EASY) {
-            return true;
-        }
-        return lastPattern.getName().contains("Portal") && nextPattern.getName().contains("Portal");
-    }
-
-    private void mutate(LevelChromosome level) {
-        List<Pattern> patterns = level.getPatterns();
-        for (int i = 0; i < patterns.size(); i++) {
-            if (Math.random() < mutationRate) {
-                PlayerState stateAtMutationPoint = PlayerState.NORMAL;
-                List<String> markovStateAtMutationPoint = new ArrayList<>(List.of(MarkovChain.START_TOKEN, MarkovChain.START_TOKEN));
-
-                if (i > 1) {
-                    for(int j=0; j<i-1; j++) {
-                        stateAtMutationPoint = getPlayerStateAfterPattern(patterns.get(j), stateAtMutationPoint);
-                    }
-                    markovStateAtMutationPoint = List.of(patterns.get(i-2).getName(), patterns.get(i-1).getName());
-                } else if (i == 1) {
-                    markovStateAtMutationPoint = List.of(MarkovChain.START_TOKEN, patterns.get(0).getName());
-                }
-
-                MarkovChain currentChain = getChainForState(stateAtMutationPoint);
-                patterns.set(i, currentChain.getNextPattern(markovStateAtMutationPoint));
-            }
-        }
-    }
-
-    private MarkovChain getChainForState(PlayerState state) {
+    private boolean isPatternCompatibleWithState(Pattern pattern, PlayerState state) {
+        GeneType firstGene = pattern.getGenes().getFirst();
         return switch (state) {
-            case FLYING -> shipModeChain;
-            case BALL -> ballModeChain;
-            default -> normalModeChain;
+            case FLYING -> firstGene != GeneType.SPIKE_GROUND && firstGene != GeneType.BLOCK_GROUND;
+            case BALL -> true;
+            default -> firstGene != GeneType.SPIKE_AIR;
         };
     }
 
+    private void mutate(LevelChromosome level) {
+        var result = playtesterForMutation.run(level, PlayerPersona.NORMAL);
+        Map<Integer, Integer> heatmap = result.deathHeatmap;
+        if (heatmap == null) {
+            heatmap = new HashMap<>();
+            System.out.println("Warning: deathHeatmap was null, using empty heatmap for mutation");
+        }
+
+        List<Pattern> patterns = level.getPatterns();
+        for (int i = 0; i < patterns.size(); i++) {
+            boolean shouldMutate = false;
+            int patternStartGene = level.getGeneIndexForPattern(i);
+            int patternEndGene = patternStartGene + patterns.get(i).getLength();
+
+            for (int geneIdx = patternStartGene; geneIdx < patternEndGene; geneIdx++) {
+                if (heatmap.getOrDefault(geneIdx, 0) > 0) {
+                    shouldMutate = true;
+                    break;
+                }
+            }
+            if (shouldMutate || Math.random() < this.mutationRate) {
+                PlayerState stateBeforePattern = getPlayerStateBeforePattern(patterns, i);
+                Pattern currentPattern = patterns.get(i);
+                Pattern easierPattern = PatternLibrary.findEasierAlternativeForState(currentPattern, stateBeforePattern);
+                patterns.set(i, easierPattern);
+            }
+        }
+    }
+    private LevelChromosome tournamentSelection() {
+        List<LevelChromosome> tournament = new ArrayList<>();
+        for (int i = 0; i < tournamentSize; i++) {
+            int randomIndex = (int) (Math.random() * population.size());
+            tournament.add(population.get(randomIndex));
+        }
+        return tournament.stream().max(Comparator.comparing(LevelChromosome::getFitness)).orElse(null);
+    }
+    private LevelChromosome crossover(LevelChromosome parent1, LevelChromosome parent2) {
+        List<Pattern> parent1Patterns = parent1.getPatterns();
+        List<Pattern> parent2Patterns = parent2.getPatterns();
+        List<Pattern> longerParent = parent1Patterns.size() >= parent2Patterns.size() ? parent1Patterns : parent2Patterns;
+        List<Pattern> shorterParent = parent1Patterns.size() < parent2Patterns.size() ? parent1Patterns : parent2Patterns;
+
+        int crossoverPoint = (int) (Math.random() * shorterParent.size());
+        List<Pattern> offspringPatterns = new ArrayList<>();
+        offspringPatterns.addAll(longerParent.subList(0, crossoverPoint));
+        offspringPatterns.addAll(shorterParent.subList(crossoverPoint, shorterParent.size()));
+
+        if (crossoverPoint < longerParent.size()) {
+            offspringPatterns.addAll(longerParent.subList(Math.min(crossoverPoint + shorterParent.size() - crossoverPoint, longerParent.size()), longerParent.size()));
+        }
+        return new LevelChromosome(offspringPatterns);
+    }
     private PlayerState getPlayerStateAfterPattern(Pattern pattern, PlayerState currentState) {
         for (GeneType gene : pattern.getGenes()) {
             switch (gene) {
@@ -237,23 +244,11 @@ public class GeneticLevelGenerator {
         }
         return currentState;
     }
-
-    private LevelChromosome tournamentSelection() {
-        List<LevelChromosome> tournament = new ArrayList<>();
-        for (int i = 0; i < tournamentSize; i++) {
-            int randomIndex = (int) (Math.random() * population.size());
-            tournament.add(population.get(randomIndex));
+    private PlayerState getPlayerStateBeforePattern(List<Pattern> patterns, int index) {
+        PlayerState state = PlayerState.NORMAL;
+        for (int i = 0; i < index; i++) {
+            state = getPlayerStateAfterPattern(patterns.get(i), state);
         }
-        return tournament.stream().max(Comparator.comparing(LevelChromosome::getFitness)).orElse(null);
-    }
-
-    private LevelChromosome crossover(LevelChromosome parent1, LevelChromosome parent2) {
-        List<Pattern> parent1Patterns = parent1.getPatterns();
-        List<Pattern> parent2Patterns = parent2.getPatterns();
-        int crossoverPoint = (int) (Math.random() * Math.min(parent1Patterns.size(), parent2Patterns.size()));
-        List<Pattern> offspringPatterns = new ArrayList<>();
-        offspringPatterns.addAll(parent1Patterns.subList(0, crossoverPoint));
-        offspringPatterns.addAll(parent2Patterns.subList(crossoverPoint, parent2Patterns.size()));
-        return new LevelChromosome(offspringPatterns);
+        return state;
     }
 }

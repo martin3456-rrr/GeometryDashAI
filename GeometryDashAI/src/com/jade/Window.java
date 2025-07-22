@@ -5,6 +5,9 @@ import com.util.Time;
 
 import javax.swing.JFrame;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.Generator.PatternLibrary;
 
 public class Window extends JFrame implements Runnable {
     public enum GameMode { AI_GENERATED, ORIGINAL_LEVEL }
@@ -17,7 +20,10 @@ public class Window extends JFrame implements Runnable {
     private Image doubleBufferImage = null;
     private Graphics doubleBufferGraphics = null;
     public static GameMode selectedMode = GameMode.AI_GENERATED;
-    public static String levelToLoad = "stereo_madness";
+    public static List<String> availableLevels = new ArrayList<>(PatternLibrary.getOriginalLevels().keySet());
+    public static int selectedLevelIndex = 0; 
+    public static String levelToLoad = availableLevels.get(selectedLevelIndex);
+    
     public Window()
     {
         this.MouseListener = new ML();
@@ -115,7 +121,18 @@ public class Window extends JFrame implements Runnable {
             e.printStackTrace();
         }
     }
+    public static void nextLevel() {
+        selectedLevelIndex = (selectedLevelIndex + 1) % availableLevels.size();
+        levelToLoad = availableLevels.get(selectedLevelIndex);
+    }
+
+    public static void previousLevel() {
+        selectedLevelIndex = (selectedLevelIndex - 1 + availableLevels.size()) % availableLevels.size();
+        levelToLoad = availableLevels.get(selectedLevelIndex);
+    }
     public void close() {
         System.exit(0);
     }
+
+
 }

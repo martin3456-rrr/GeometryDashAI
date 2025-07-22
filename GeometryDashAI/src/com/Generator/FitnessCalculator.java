@@ -1,277 +1,194 @@
 package com.Generator;
 
-import com.Component.PlayerState;
+import com.manager.Difficulty;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class FitnessCalculator {
-    private static final double PLAYABILITY_SCORE = 200.0;
-    private static final double PENALTY_DEATH = -50.0;
-    private static final double MARKOV_FLOW_BONUS = 75.0; // Zwiększony bonus
-    private final Map<PlayerState, MarkovChain> chains;
-    public FitnessCalculator(Map<PlayerState, MarkovChain> chains) {
-        this.chains = chains;
+public class FitnessCalculator implements ILevelEvaluator {
+    private static final double SCORE_PLAYABLE = 500.0;
+    private static final double PENALTY_DEATH = -100.0;
+    private static final double PENALTY_IMPOSSIBLE_SECTION = -1000.0;
+    private static final double BONUS_VARIETY = 15.0;
+    private static final double PENALTY_REPETITION = -75.0;
+    private static final double BONUS_JUMP_SEQUENCES = 10.0;
+    private static final double BONUS_MODE_TRANSITIONS = 20.0;
+    private static final double BONUS_DYNAMIC_PATTERNS = 15.0;
+    private static final double PENALTY_DIFFICULTY_SPIKE = -250.0;
+
+    private final AdvancedPlaytester advancedPlaytester;
+
+    public FitnessCalculator() {
+        this.advancedPlaytester = new AdvancedPlaytester();
     }
 
-    public void calculateFitness(LevelChromosome level) {
-        double score = 0.0;
-        score += checkPlayability(level);
+    @Override
+    public double evaluateFitness(LevelChromosome level, LevelGenerationConfig config) {
+        ComprehensivePlaytestResult comprehensiveResult = advancedPlaytester.comprehensiveTest(level);
 
-        if (score <= 0) {
-            level.setFitness(0);
-            return;
+        int totalDeaths = comprehensiveResult.deaths;
+        int totalImpossible = comprehensiveResult.impossibleSections;
+
+
+        if (totalImpossible > 0 || totalDeaths > 2) {
+            return Math.max(0, totalImpossible * PENALTY_IMPOSSIBLE_SECTION + totalDeaths * PENALTY_DEATH);
         }
 
-        score += calculateDifficultyScore(level);
-        score -= calculateMonotonyPenalty(level);
-        score += calculateVarietyBonus(level);
-        score += calculateFlowScore(level);
-        score += calculateMarkovFlowBonus(level);
-        score += rewardForOriginalFlow(level);
-        score -= penalizePatternRepetition(level);
+        double score = SCORE_PLAYABLE;
+        
+        List<Pattern> patterns = level.getPatterns();
+        score += calculateVarietyBonus(patterns);
+        score -= calculateRepetitionPenalty(patterns);
+        score -= calculateSpikePenalty(comprehensiveResult.deathHeatmap);
+        score += calculateFunFactor(patterns) * config.getFunFactorWeight();
+        score += calculateAdvancedFunFactor(patterns, config);
 
         level.setFitness(Math.max(0, score));
+        return score;
     }
-    private double rewardForOriginalFlow(LevelChromosome level) {
+
+
+    private double calculateFunFactor(List<Pattern> patterns) {
+        double funFactor = 0.0;
+        funFactor += calculateJumpSequenceBonus(patterns);
+        funFactor += calculateModeTransitionBonus(patterns);
+        funFactor += calculateDynamicPatternBonus(patterns);
+        
+        return funFactor;
+    }
+    private double calculateJumpSequenceBonus(List<Pattern> patterns) {
         double bonus = 0.0;
-        List<Pattern> patterns = level.getPatterns();
-        List<String> originalSequence = PatternLibrary.getOriginalLevels().get("stereo_madness");
-
-        if (originalSequence == null || patterns.size() < 2) {
-            return 0;
-        }
-
-        for (int i = 0; i < patterns.size() - 1; i++) {
-            String p1 = patterns.get(i).getName();
-            String p2 = patterns.get(i + 1).getName();
-            for (int j = 0; j < originalSequence.size() - 1; j++) {
-                if (originalSequence.get(j).equals(p1) && originalSequence.get(j + 1).equals(p2)) {
-                    bonus += 20.0;
-                    break;
+        int consecutiveJumps = 0;
+        
+        for (Pattern pattern : patterns) {
+            if (pattern.getName().toLowerCase().contains("jump") || 
+                pattern.getName().toLowerCase().contains("spike")) {
+                consecutiveJumps++;
+                if (consecutiveJumps >= 3) {
+                    bonus += BONUS_JUMP_SEQUENCES;
                 }
+            } else {
+                consecutiveJumps = 0;
             }
         }
+        
+        return bonus;
+    }
+    
+    private double calculateModeTransitionBonus(List<Pattern> patterns) {
+        double bonus = 0.0;
+        
+        for (Pattern pattern : patterns) {
+            if (pattern.getName().toLowerCase().contains("portal") ||
+                pattern.getName().toLowerCase().contains("ship") ||
+                pattern.getName().toLowerCase().contains("ball")) {
+                bonus += BONUS_MODE_TRANSITIONS;
+            }
+        }
+        
+        return bonus;
+    }
+    
+    private double calculateDynamicPatternBonus(List<Pattern> patterns) {
+        double bonus = 0.0;
+        
+        for (Pattern pattern : patterns) {
+            if (pattern.getName().toLowerCase().contains("moving") ||
+                pattern.getName().toLowerCase().contains("dynamic") ||
+                pattern.getName().toLowerCase().contains("wave")) {
+                bonus += BONUS_DYNAMIC_PATTERNS;
+            }
+        }
+        
         return bonus;
     }
 
-    private double penalizePatternRepetition(LevelChromosome level) {
+    private double calculateRepetitionPenalty(List<Pattern> patterns) {
         double penalty = 0.0;
-        List<Pattern> patterns = level.getPatterns();
         if (patterns.size() < 2) return 0;
 
         for (int i = 0; i < patterns.size() - 1; i++) {
-            if (patterns.get(i).getName().equals(patterns.get(i+1).getName())) {
-                penalty += 30.0;
+            if (patterns.get(i).getName().equals(patterns.get(i + 1).getName())) {
+                penalty += PENALTY_REPETITION;
             }
         }
         return penalty;
     }
-    private double calculateMarkovFlowBonus(LevelChromosome level) {
-        double bonus = 0.0;
-        List<Pattern> patterns = level.getPatterns();
-        if (patterns.size() < 3) return 0;
 
-        PlayerState currentState = PlayerState.NORMAL;
-        MarkovChain currentChain = chains.get(currentState);
-
-        List<String> markovState = List.of(MarkovChain.START_TOKEN, patterns.get(0).getName());
-        if (currentChain.isKnownTransition(markovState, patterns.get(1).getName())) {
-            bonus += 5;
+    private double calculateVarietyBonus(List<Pattern> patterns) {
+        Set<String> uniquePatterns = new HashSet<>();
+        for (Pattern p : patterns) {
+            uniquePatterns.add(p.getName());
         }
-
-        for (int i = 0; i < patterns.size() - 2; i++) {
-            Pattern p1 = patterns.get(i);
-            Pattern p2 = patterns.get(i + 1);
-            Pattern p3 = patterns.get(i + 2);
-
-            currentState = getPlayerStateAfterPattern(p1, currentState);
-            currentChain = chains.get(currentState);
-            markovState = List.of(p1.getName(), p2.getName());
-
-            if (currentChain.isKnownTransition(markovState, p3.getName())) {
-                bonus += 5;
+        return uniquePatterns.size() * BONUS_VARIETY;
+    }
+    private double calculateSpikePenalty(Map<Integer, Integer> heatmap) {
+        if (heatmap.isEmpty()) {
+            return 0;
+        }
+        int maxDeathsInOneSpot = 0;
+        for (int count : heatmap.values()) {
+            if (count > maxDeathsInOneSpot) {
+                maxDeathsInOneSpot = count;
             }
         }
-        return Math.min(bonus, MARKOV_FLOW_BONUS);
+
+        if (maxDeathsInOneSpot > 1) {
+            return Math.pow(maxDeathsInOneSpot, 2) * PENALTY_DIFFICULTY_SPIKE;
+        }
+        return 0;
     }
 
-    private PlayerState getPlayerStateAfterPattern(Pattern pattern, PlayerState currentState) {
-        for (GeneType gene : pattern.getGenes()) {
-            switch(gene) {
-                case PORTAL_SHIP: return PlayerState.FLYING;
-                case PORTAL_BALL: return PlayerState.BALL;
-                case PORTAL_NORMAL: return PlayerState.NORMAL;
+    private double calculateAdvancedFunFactor(List<Pattern> patterns, LevelGenerationConfig config) {
+        double funFactor = 0.0;
+
+        funFactor += calculateRhythmCoherence(patterns);
+        funFactor += calculateChallengeBalance(patterns);
+        funFactor += calculateDifficultyProgression(patterns);
+        funFactor += calculateMechanicVariation(patterns);
+
+        return funFactor * config.getFunFactorWeight();
+    }
+    private double calculateRhythmCoherence(List<Pattern> patterns) {
+        long jumpLikePatterns = patterns.stream()
+                .filter(p -> p.getName().toLowerCase().contains("jump") || p.getName().toLowerCase().contains("spike"))
+                .count();
+        double ratio = (double) jumpLikePatterns / patterns.size();
+        return (ratio > 0.4 && ratio < 0.6) ? 20.0 : -10.0;
+    }
+
+    private double calculateChallengeBalance(List<Pattern> patterns) {
+        long easy = patterns.stream().filter(p -> p.getDifficulty() == Difficulty.EASY).count();
+        long medium = patterns.stream().filter(p -> p.getDifficulty() == Difficulty.MEDIUM).count();
+        long hard = patterns.stream().filter(p -> p.getDifficulty() == Difficulty.HARD).count();
+        if (easy > patterns.size() * 0.8 || medium > patterns.size()*0.5 || hard > patterns.size() * 0.7) {
+            return -50.0;
+        }
+        return 15.0;
+    }
+
+    private double calculateDifficultyProgression(List<Pattern> patterns) {
+        if (patterns.size() < 10) return 0.0;
+        int increasingSegments = 0;
+        for (int i = 0; i < patterns.size() - 1; i++) {
+            if (patterns.get(i).getDifficulty().ordinal() < patterns.get(i + 1).getDifficulty().ordinal()) {
+                increasingSegments++;
             }
         }
-        return currentState;
+        return increasingSegments * 2.0;
     }
-    private double checkPlayability(LevelChromosome level) {
-        List<GeneType> genes = level.getGenes();
-        PlayerState botState = PlayerState.NORMAL;
-        double botY = 0;
-        double botVelocityY = 0;
-        float gravityMultiplier = 1.0f;
-        for (int i = 0; i < genes.size(); i++) {
-            GeneType currentGene = genes.get(i);
-            GeneType nextGene = (i + 1 < genes.size()) ? genes.get(i + 1) : GeneType.EMPTY;
-            if (botState == PlayerState.NORMAL) {
-                if (botY > 0) {
-                    botY -= 0.5;
+    private double calculateMechanicVariation(List<Pattern> patterns) {
+        Set<GeneType> mechanics = new HashSet<>();
+        for (Pattern pattern : patterns) {
+            pattern.getGenes().forEach(gene -> {
+                if (gene.toString().startsWith("PORTAL")) {
+                    mechanics.add(gene);
                 }
-            } else if (botState == PlayerState.FLYING) {
-                botVelocityY -= 0.1;
-                botY += botVelocityY;
-                if (botY < 0) botY = 0;
-            }
-
-            switch (botState) {
-                case NORMAL:
-                    if ((nextGene == GeneType.SPIKE_GROUND || nextGene == GeneType.BLOCK_GROUND) && botY == 0) {
-                        botY = 1;
-                    }
-                    break;
-                case FLYING:
-                    if ((nextGene == GeneType.SPIKE_AIR || nextGene == GeneType.BLOCK_FLOATING) && botY < 1.5) {
-                        botVelocityY += 0.3;
-                    }
-                    if (botY > 3.0) return PENALTY_DEATH;
-                    break;
-                case BALL:
-                    if ((nextGene == GeneType.SPIKE_GROUND && gravityMultiplier == -1.0f) || (nextGene == GeneType.SPIKE_AIR && gravityMultiplier == 1.0f)) {
-                        gravityMultiplier *= -1;
-                    }
-                    break;
-            }
-
-            switch (currentGene) {
-                case SPIKE_GROUND:
-                    if (botY == 0 && gravityMultiplier == 1.0f) return PENALTY_DEATH;
-                    break;
-                case SPIKE_AIR:
-                    if (botY > 0 && gravityMultiplier == -1.0f) return PENALTY_DEATH;
-                    break;
-                case PORTAL_SHIP:
-                    botState = PlayerState.FLYING;
-                    botVelocityY = 0;
-                    break;
-                case PORTAL_BALL:
-                    botState = PlayerState.BALL;
-                    break;
-                case PORTAL_NORMAL:
-                    botState = PlayerState.NORMAL;
-                    gravityMultiplier = 1.0f;
-                    break;
-            }
+            });
         }
-        return PLAYABILITY_SCORE;
+        return mechanics.size() * 25.0;
     }
 
-    private double calculateDifficultyScore(LevelChromosome level) {
-        double score = 0;
-        List<GeneType> genes = level.getGenes();
-
-        int spikeCount = (int) genes.stream().filter(g ->
-                g == GeneType.SPIKE_GROUND || g == GeneType.SPIKE_AIR).count();
-        int blockCount = (int) genes.stream().filter(g ->
-                g == GeneType.BLOCK_GROUND || g == GeneType.BLOCK_AIR).count();
-        int emptyCount = (int) genes.stream().filter(g -> g == GeneType.EMPTY).count();
-
-        double obstacleRatio = (double)(spikeCount + blockCount) / genes.size();
-        if (obstacleRatio >= 0.1 && obstacleRatio <= 0.25) {
-            score += 150;
-        } else if (obstacleRatio >= 0.05 && obstacleRatio <= 0.35) {
-            score += 100;
-        } else {
-            score += 50;
-        }
-
-        if (spikeCount >= 5 && spikeCount <= 20) {
-            score += 100;
-        }
-        double emptyRatio = (double)emptyCount / genes.size();
-        if (emptyRatio >= 0.6 && emptyRatio <= 0.8) {
-            score += 50;
-        }
-
-        return score;
-    }
-
-    private double calculateMonotonyPenalty(LevelChromosome level) {
-        double penalty = 0;
-        List<GeneType> genes = level.getGenes();
-
-        int currentStreak = 1;
-        GeneType currentType = genes.get(0);
-        for (int i = 1; i < genes.size(); i++) {
-            if (genes.get(i) == currentType) {
-                currentStreak++;
-            } else {
-                if (currentStreak >= 15) {
-                    penalty += (currentStreak - 14) * 10;
-                }
-                if (currentStreak >= 25) {
-                    penalty += (currentStreak - 24) * 20;
-                }
-
-                currentStreak = 1;
-                currentType = genes.get(i);
-            }
-        }
-
-        if (currentStreak >= 15) {
-            penalty += (currentStreak - 14) * 10;
-        }
-        if (currentStreak >= 25) {
-            penalty += (currentStreak - 24) * 20;
-        }
-
-        return penalty;
-    }
-    private double calculateVarietyBonus(LevelChromosome level) {
-        List<GeneType> genes = level.getGenes();
-        Set<GeneType> usedTypes = new HashSet<>(genes);
-
-        double bonus = usedTypes.size() * 25;
-        if (usedTypes.size() == GeneType.values().length) {
-            bonus += 50;
-        }
-
-        return bonus;
-    }
-    private double calculateFlowScore(LevelChromosome level) {
-        double score = 0;
-        List<GeneType> genes = level.getGenes();
-        PlayerState currentState = PlayerState.NORMAL;
-
-        for (int i = 0; i < genes.size() - 2; i++) {
-            GeneType current = genes.get(i);
-            GeneType next = genes.get(i + 1);
-            GeneType afterNext = genes.get(i + 2);
-            if (current == GeneType.PORTAL_SHIP) currentState = PlayerState.FLYING;
-            if (current == GeneType.PORTAL_NORMAL) currentState = PlayerState.NORMAL;
-
-            if (isGoodSequence(current, next, afterNext, currentState)) {
-                score += 10;
-            }
-            if (isBadSequence(current, next, afterNext, currentState)) {
-                score -= 15;
-            }
-        }
-        return score;
-    }
-
-    private boolean isGoodSequence(GeneType current, GeneType next, GeneType afterNext,PlayerState state) {
-        if (state == PlayerState.NORMAL) {
-            if (current == GeneType.EMPTY && next == GeneType.SPIKE_GROUND && afterNext == GeneType.EMPTY) return true;
-        }
-        if (state == PlayerState.FLYING) {
-            if (current == GeneType.EMPTY && next == GeneType.BLOCK_FLOATING && afterNext == GeneType.EMPTY) return true;
-        }
-        return false;
-    }
-
-    private boolean isBadSequence(GeneType current, GeneType next, GeneType afterNext, PlayerState state) {
-        if (current == GeneType.SPIKE_GROUND && next == GeneType.SPIKE_GROUND && afterNext == GeneType.SPIKE_GROUND) return true;
-        return false;
-    }
 }

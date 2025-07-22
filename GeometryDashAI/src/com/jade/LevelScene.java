@@ -1,13 +1,11 @@
 package com.jade;
 
 import com.Component.*;
-import com.Generator.OriginalLevelLoader;
+import com.Generator.*;
 import com.dataStructure.AssertPool;
 import com.dataStructure.Transform;
-import com.Generator.GeneratedLevelLoader;
-import com.Generator.GeneticLevelGenerator;
-import com.Generator.LevelChromosome;
 import com.manager.AudioManager;
+import com.manager.Difficulty;
 import com.util.Constants;
 import com.util.Vector2;
 
@@ -15,6 +13,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class LevelScene extends Scene {
     public GameObject player;
@@ -29,7 +28,8 @@ public class LevelScene extends Scene {
         initPlayer();
         initBackgroundsAndGround();
 
-        if (Window.selectedMode == Window.GameMode.ORIGINAL_LEVEL) {
+
+        if (Window.selectedMode == Window.GameMode.AI_GENERATED) {
             System.out.println("Loading original level: " + Window.levelToLoad);
             OriginalLevelLoader loader = new OriginalLevelLoader();
             List<GameObject> levelObjects = loader.loadLevel(Window.levelToLoad);
@@ -38,8 +38,16 @@ public class LevelScene extends Scene {
             }
         } else {
             System.out.println("Generating new level with AI...");
+            LevelGenerationConfig config = new LevelGenerationConfig(
+                    Difficulty.HARD,
+                    Constants.DEFAULT_LEVEL_LENGTH*2,
+                    Set.of(),
+                    1.0,
+                    GenerationModelType.MARKOV
+            );
+
             GeneticLevelGenerator generator = new GeneticLevelGenerator();
-            LevelChromosome bestLevel = generator.generateBestLevel();
+            LevelChromosome bestLevel = generator.generateBestLevel(config);
             GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
             List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
             for (GameObject obj : levelObjects) {
@@ -114,7 +122,7 @@ public class LevelScene extends Scene {
 
         AssertPool.addSpritesheet("assets/spikes.png",42,42,2,6,4);
         AssertPool.addSpritesheet("assets/bigSprites.png",84,84,2,2,2);
-        AssertPool.addSpritesheet("assets/smallBlocks.png",42,42,2,6,1);
+        AssertPool.addSpritesheet("assets/smallBlocks.png",42,42,2,6,6);
         AssertPool.addSpritesheet("assets/portal.png",44,85,2,2,2);
     }
 
