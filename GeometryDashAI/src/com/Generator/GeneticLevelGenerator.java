@@ -9,13 +9,14 @@ import com.manager.PluginLoader;
 
 public class GeneticLevelGenerator {
 
-    private final int populationSize = 300;
-    private final double mutationRate = 0.25;
-    private final int tournamentSize = 5;
-    private final int maxGenerations = 500;
+    private final int populationSize;
+    private final double mutationRate;
+    private final int tournamentSize;
+    private final int maxGenerations;
     private final AIPlaytester playtesterForMutation = new AIPlaytester();
     private final ILevelGenerationModel lstmModel;
     private final HybridLevelGenerator hybridGenerator;
+    private final Random parameterRandom = new Random();
 
     private List<LevelChromosome> population;
     private final ILevelEvaluator fitnessCalculator;
@@ -23,6 +24,11 @@ public class GeneticLevelGenerator {
     private final List<ILevelGenerationModel> pluginModels;
 
     public GeneticLevelGenerator() {
+        this.populationSize = generateRandomPopulationSize();
+        this.mutationRate = generateRandomMutationRate();
+        this.tournamentSize = generateRandomTournamentSize();
+        this.maxGenerations = generateRandomMaxGenerations();
+
         ILevelGenerationModel normalModeChain = new MarkovChain();
         ILevelGenerationModel shipModeChain = new MarkovChain();
         ILevelGenerationModel ballModeChain = new MarkovChain();
@@ -251,4 +257,20 @@ public class GeneticLevelGenerator {
         }
         return state;
     }
+    private int generateRandomPopulationSize() {
+        return 150 + parameterRandom.nextInt(351);
+    }
+
+    private double generateRandomMutationRate() {
+        return 0.1 + (parameterRandom.nextDouble() * 0.3);
+    }
+
+    private int generateRandomTournamentSize() {
+        return 3 + parameterRandom.nextInt(6);
+    }
+
+    private int generateRandomMaxGenerations() {
+        return 200 + parameterRandom.nextInt(601);
+    }
+
 }

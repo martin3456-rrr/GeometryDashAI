@@ -1,5 +1,7 @@
 package com.jade;
 
+import com.Generator.GenerationModelType;
+import com.manager.Difficulty;
 import com.util.Constants;
 import com.util.Time;
 
@@ -11,6 +13,8 @@ import com.Generator.PatternLibrary;
 
 public class Window extends JFrame implements Runnable {
     public enum GameMode { AI_GENERATED, ORIGINAL_LEVEL }
+    public static Difficulty selectedDifficulty = Difficulty.MEDIUM;
+    public static GenerationModelType selectedModelType = GenerationModelType.MARKOV;
     public ML MouseListener;
     public KL keyLister;
     public boolean isInEditor = false;
@@ -23,7 +27,9 @@ public class Window extends JFrame implements Runnable {
     public static List<String> availableLevels = new ArrayList<>(PatternLibrary.getOriginalLevels().keySet());
     public static int selectedLevelIndex = 0; 
     public static String levelToLoad = availableLevels.get(selectedLevelIndex);
-    
+    private final List<Scene> scenes = new ArrayList<>();
+    private int currentSceneIndex = 0;
+
     public Window()
     {
         this.MouseListener = new ML();
@@ -55,6 +61,10 @@ public class Window extends JFrame implements Runnable {
                 currentScene.init();
                 break;
             case 1:
+                currentScene = new OptionsScene("Options");
+                currentScene.init();
+                break;
+            case 2:
                 currentScene = new LevelScene("Level");
                 currentScene.init();
                 break;
@@ -120,6 +130,19 @@ public class Window extends JFrame implements Runnable {
         {
             e.printStackTrace();
         }
+    }
+    public static void cycleDifficulty() {
+        Difficulty[] difficulties = Difficulty.values();
+        int currentIndex = selectedDifficulty.ordinal();
+        selectedDifficulty = difficulties[(currentIndex + 1) % difficulties.length];
+        System.out.println("Selected difficulty: " + selectedDifficulty);
+    }
+
+    public static void cycleModelType() {
+        GenerationModelType[] models = GenerationModelType.values();
+        int currentIndex = selectedModelType.ordinal();
+        selectedModelType = models[(currentIndex + 1) % models.length];
+        System.out.println("Selected model type: " + selectedModelType);
     }
     public static void nextLevel() {
         selectedLevelIndex = (selectedLevelIndex + 1) % availableLevels.size();

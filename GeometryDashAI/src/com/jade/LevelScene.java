@@ -39,11 +39,11 @@ public class LevelScene extends Scene {
         } else {
             System.out.println("Generating new level with AI...");
             LevelGenerationConfig config = new LevelGenerationConfig(
-                    Difficulty.HARD,
+                    Window.selectedDifficulty,
                     Constants.DEFAULT_LEVEL_LENGTH*2,
                     Set.of(),
                     1.0,
-                    GenerationModelType.MARKOV
+                    Window.selectedModelType
             );
 
             GeneticLevelGenerator generator = new GeneticLevelGenerator();

@@ -14,12 +14,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
 
 public class MenuScene extends Scene {
-    private Rectangle startGameButton;
+    private Rectangle playGamesButton;
+    private Rectangle playButton;
+    private Rectangle playAIButton;
+    private Rectangle backButton;
+    private Rectangle optionsButton;
     private Rectangle exitButton;
     private ML mouseListener;
-    private long lastKeyPress = 0;
-    private final long KEY_DELAY = 200; // 200ms opóźnienie
-
+    private boolean playSubMenuActive = false;
 
     public MenuScene(String name) {
         super.Scene(name);
@@ -53,56 +55,69 @@ public class MenuScene extends Scene {
         int startY = 250;
         int spacing = 70;
 
-        startGameButton = new Rectangle(centerX, startY, buttonWidth, buttonHeight);
+        playGamesButton = new Rectangle(centerX, startY, buttonWidth, buttonHeight);
+        optionsButton = new Rectangle(centerX, startY + 1 * spacing, buttonWidth, buttonHeight);
         exitButton = new Rectangle(centerX, startY + 2 * spacing, buttonWidth, buttonHeight);
+
+
+        playButton = new Rectangle(centerX, startY, buttonWidth, buttonHeight);
+        playAIButton = new Rectangle(centerX, startY + 1 * spacing, buttonWidth, buttonHeight);
+        backButton = new Rectangle(centerX, startY + 2 * spacing, buttonWidth, buttonHeight);
     }
 
     @Override
     public void update(double dt) {
-        long currentTime = System.currentTimeMillis();
-
-        if (currentTime - lastKeyPress > KEY_DELAY) {
-            if (Window.keyListener().IsKeyPressed(KeyEvent.VK_LEFT) ||
-                    Window.keyListener().IsKeyPressed(KeyEvent.VK_UP)) {
-                Window.previousLevel();
-                lastKeyPress = currentTime;
-            }
-
-            if (Window.keyListener().IsKeyPressed(KeyEvent.VK_RIGHT) ||
-                    Window.keyListener().IsKeyPressed(KeyEvent.VK_DOWN)) {
-                Window.nextLevel();
-                lastKeyPress = currentTime;
-            }
-        }
-
-        for (GameObject go : gameObject) {
-            go.update(dt);
-        }
         Vector2 mousePos = new Vector2(mouseListener.x, mouseListener.y);
 
-        if (startGameButton != null && startGameButton.contains(mousePos.x, mousePos.y)) {
-            if ((mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1)) {
-                Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
-                System.out.println("Starting original level: " + Window.levelToLoad);
+        if (!playSubMenuActive) {
+            if (playGamesButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
+                playSubMenuActive = true;
+                mouseListener.mousePressed = false;
+            } else if (optionsButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
                 Window.getWindow().changeScene(1);
                 mouseListener.mousePressed = false;
-            }
-        } else if (exitButton != null && exitButton.contains(mousePos.x, mousePos.y)) {
-            if (mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
+            } else if (exitButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
                 Window.getWindow().close();
+            }
+        } else {
+            if (playAIButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
+                Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
+                Window.getWindow().changeScene(2);
+                mouseListener.mousePressed = false;
+            } else if (playButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
+                Window.selectedMode = Window.GameMode.AI_GENERATED;
+                Window.getWindow().changeScene(2);
+                mouseListener.mousePressed = false;
+            } else if (backButton.contains(mousePos.x, mousePos.y)
+                    && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
+                playSubMenuActive = false;
+                mouseListener.mousePressed = false;
             }
         }
     }
+
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(new Color(50, 50, 100));
         g2.fillRect(0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         renderer.render(g2);
-        drawButton(g2, startGameButton, "Start Game");
-        drawButton(g2, exitButton, "Exit");
 
-
+        if (!playSubMenuActive) {
+            drawButton(g2, playGamesButton, "Play Games");
+            drawButton(g2, optionsButton, "Options");
+            drawButton(g2, exitButton, "Exit");
+        } else {
+            drawButton(g2, playButton, "Play");
+            drawButton(g2, playAIButton, "Play AI");
+            drawButton(g2, backButton, "Back");
+        }
     }
+
     private void drawButton(Graphics2D g2, Rectangle buttonRect, String text) {
         boolean hovered = buttonRect.contains(mouseListener.x, mouseListener.y);
 

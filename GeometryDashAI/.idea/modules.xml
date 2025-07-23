@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GeometryDashAI.iml" filepath="$PROJECT_DIR$/GeometryDashAI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/geometry-dash-ai.iml" filepath="$PROJECT_DIR$/geometry-dash-ai.iml" />
     </modules>
   </component>
 </project>
