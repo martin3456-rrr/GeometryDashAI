@@ -1,6 +1,7 @@
 package com.jade;
 
 import com.Generator.GenerationModelType;
+import com.Generator.LevelChromosome;
 import com.manager.Difficulty;
 import com.util.Constants;
 import com.util.Time;
@@ -27,8 +28,7 @@ public class Window extends JFrame implements Runnable {
     public static List<String> availableLevels = new ArrayList<>(PatternLibrary.getOriginalLevels().keySet());
     public static int selectedLevelIndex = 0; 
     public static String levelToLoad = availableLevels.get(selectedLevelIndex);
-    private final List<Scene> scenes = new ArrayList<>();
-    private int currentSceneIndex = 0;
+    public static LevelChromosome generatedChromosome = null;
 
     public Window()
     {
@@ -66,6 +66,10 @@ public class Window extends JFrame implements Runnable {
                 break;
             case 2:
                 currentScene = new LevelScene("Level");
+                currentScene.init();
+                break;
+            case 3:
+                currentScene = new GenerationScene("Generating...");
                 currentScene.init();
                 break;
             default:

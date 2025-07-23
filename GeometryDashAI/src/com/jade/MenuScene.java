@@ -85,12 +85,12 @@ public class MenuScene extends Scene {
         } else {
             if (playAIButton.contains(mousePos.x, mousePos.y)
                     && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
-                Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
-                Window.getWindow().changeScene(2);
+                Window.selectedMode = Window.GameMode.AI_GENERATED;
+                Window.getWindow().changeScene(3);
                 mouseListener.mousePressed = false;
             } else if (playButton.contains(mousePos.x, mousePos.y)
                     && mouseListener.mousePressed && mouseListener.mouseButton == MouseEvent.BUTTON1) {
-                Window.selectedMode = Window.GameMode.AI_GENERATED;
+                Window.selectedMode = Window.GameMode.ORIGINAL_LEVEL;
                 Window.getWindow().changeScene(2);
                 mouseListener.mousePressed = false;
             } else if (backButton.contains(mousePos.x, mousePos.y)

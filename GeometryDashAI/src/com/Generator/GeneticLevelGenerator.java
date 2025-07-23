@@ -4,6 +4,7 @@ import com.Component.PlayerState;
 
 import java.util.*;
 
+import com.jade.Log;
 import com.manager.Difficulty;
 import com.manager.PluginLoader;
 
@@ -83,8 +84,8 @@ public class GeneticLevelGenerator {
             population.sort(Comparator.comparingDouble(LevelChromosome::getFitness).reversed());
 
             if (generation % 10 == 0) {
-                System.out.println("Generacja " + generation + ": Najlepszy Fitness = " + population.getFirst().getFitness());
-                System.out.println("Najlepszy poziom ma " + population.getFirst().getPatterns().size() + " wzorców");
+                Log.add("Generacja " + generation + ": Najlepszy Fitness = " + population.getFirst().getFitness());
+                Log.add("Najlepszy poziom ma " + population.getFirst().getPatterns().size() + " wzorców");
             }
 
             int eliteSize = (int) (populationSize * 0.05);
@@ -105,7 +106,7 @@ public class GeneticLevelGenerator {
                 .orElse(null);
             
         if (bestLevel != null) {
-            System.out.println("Wygenerowano najlepszy poziom z " + bestLevel.getPatterns().size() + " wzorców");
+            Log.add("Wygenerowano najlepszy poziom z " + bestLevel.getPatterns().size() + " wzorców");
         }
         
         return bestLevel;
@@ -158,9 +159,9 @@ public class GeneticLevelGenerator {
                 currentLength += fillerPattern.getLength();
                 currentPlayerState = getPlayerStateAfterPattern(fillerPattern, currentPlayerState);
             }
-            
-            System.out.println("Chromosome " + i + " created with " + chromosomePatterns.size() + 
-                             " patterns, total length: " + currentLength + " (target: " + config.getTargetLength() + ")");
+
+            Log.add("Chromosome " + i + " created with " + chromosomePatterns.size() +
+                    " patterns, total length: " + currentLength + " (target: " + config.getTargetLength() + ")");
             newPopulation.add(new LevelChromosome(chromosomePatterns));
         }
         return newPopulation;

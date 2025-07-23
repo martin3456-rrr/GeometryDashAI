@@ -28,15 +28,7 @@ public class LevelScene extends Scene {
         initPlayer();
         initBackgroundsAndGround();
 
-
         if (Window.selectedMode == Window.GameMode.AI_GENERATED) {
-            System.out.println("Loading original level: " + Window.levelToLoad);
-            OriginalLevelLoader loader = new OriginalLevelLoader();
-            List<GameObject> levelObjects = loader.loadLevel(Window.levelToLoad);
-            for (GameObject obj : levelObjects) {
-                addGameObject(obj);
-            }
-        } else {
             System.out.println("Generating new level with AI...");
             LevelGenerationConfig config = new LevelGenerationConfig(
                     Window.selectedDifficulty,
@@ -45,7 +37,6 @@ public class LevelScene extends Scene {
                     1.0,
                     Window.selectedModelType
             );
-
             GeneticLevelGenerator generator = new GeneticLevelGenerator();
             LevelChromosome bestLevel = generator.generateBestLevel(config);
             GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
@@ -53,8 +44,17 @@ public class LevelScene extends Scene {
             for (GameObject obj : levelObjects) {
                 addGameObject(obj);
             }
+            Window.generatedChromosome = null;
+        } else if (Window.selectedMode == Window.GameMode.ORIGINAL_LEVEL) {
+            System.out.println("Loading original level: " + Window.levelToLoad);
+            OriginalLevelLoader loader = new OriginalLevelLoader();
+            List<GameObject> levelObjects = loader.loadLevel(Window.levelToLoad);
+            for (GameObject obj : levelObjects) {
+                addGameObject(obj);
+            }
         }
     }
+
     private void initAudioManager() {
         AudioManager.addSound("jump", "assets/sounds/jump.wav");
         AudioManager.addSound("death", "assets/sounds/death.wav");
