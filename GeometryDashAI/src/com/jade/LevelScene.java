@@ -29,24 +29,18 @@ public class LevelScene extends Scene {
         initBackgroundsAndGround();
 
         if (Window.selectedMode == Window.GameMode.AI_GENERATED) {
-            System.out.println("Generating new level with AI...");
-            LevelGenerationConfig config = new LevelGenerationConfig(
-                    Window.selectedDifficulty,
-                    Constants.DEFAULT_LEVEL_LENGTH*2,
-                    Set.of(),
-                    1.0,
-                    Window.selectedModelType
-            );
-            GeneticLevelGenerator generator = new GeneticLevelGenerator();
-            LevelChromosome bestLevel = generator.generateBestLevel(config);
-            GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
-            List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
-            for (GameObject obj : levelObjects) {
-                addGameObject(obj);
+            LevelChromosome bestLevel =  Window.generatedChromosome;
+            if (bestLevel != null) {
+                GeneratedLevelLoader levelLoader = new GeneratedLevelLoader();
+                List<GameObject> levelObjects = levelLoader.translateChromosomeToGameObjects(bestLevel);
+                for (GameObject obj : levelObjects) {
+                    addGameObject(obj);
+                }
+                Window.generatedChromosome = null;
+            } else {
+                Window.getWindow().changeScene(0);
             }
-            Window.generatedChromosome = null;
         } else if (Window.selectedMode == Window.GameMode.ORIGINAL_LEVEL) {
-            System.out.println("Loading original level: " + Window.levelToLoad);
             OriginalLevelLoader loader = new OriginalLevelLoader();
             List<GameObject> levelObjects = loader.loadLevel(Window.levelToLoad);
             for (GameObject obj : levelObjects) {
