@@ -1,0 +1,16 @@
+{
+  "name": "Jump Master",
+  "difficulty": "MEDIUM",
+  "patterns": [
+    "SimpleJump",
+    "PlatformJump",
+    "ThreeSpikes",
+    "JumpPadAction",
+    "DoubleSpikeJump",
+    "BlockHop",
+    "PlatformJump",
+    "SmallRunSpike",
+    "BigBlockHop",
+    "xStepJump"
+  ]
+}

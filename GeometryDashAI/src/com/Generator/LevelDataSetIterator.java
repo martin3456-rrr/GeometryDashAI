@@ -7,6 +7,7 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,9 +38,9 @@ public class LevelDataSetIterator {
         DataSet dataSet = new DataSet(features, labels);
         List<DataSet> dataSetList = dataSet.asList();
 
-        List<Pair<INDArray, INDArray>> pairList = dataSetList.stream()
-                .map(ds -> new Pair<>(ds.getFeatures(), ds.getLabels()))
-                .collect(Collectors.toList());
+        List<Pair<INDArray, INDArray>> pairList = (List<Pair<INDArray, INDArray>>) dataSetList.stream()
+                .map((Function<? super DataSet, ?>) ds -> new Pair<>(ds.getFeatures(), ds.getLabels()))
+                .collect(Collectors.toList()).reversed();
         
         return new INDArrayDataSetIterator(pairList, batchSize);
     }

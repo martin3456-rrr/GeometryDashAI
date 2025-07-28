@@ -1,0 +1,17 @@
+{
+  "name": "Easy Flow",
+  "difficulty": "EASY",
+  "patterns": [
+    "StereoMadnessStart",
+    "BlockHop",
+    "SafeRun",
+    "StairwayUp",
+    "SingleBlock",
+    "BlockRun",
+    "EnterShipEasy",
+    "ShipTunnel",
+    "PortalToNormal",
+    "EmptySpace",
+    "BlockHop"
+  ]
+}

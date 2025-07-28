@@ -1,0 +1,17 @@
+{
+  "name": "Mode Madness",
+  "difficulty": "HARD",
+  "patterns": [
+    "PortalToShip",
+    "TightFly",
+    "SpikeFlyover",
+    "PortalToBall",
+    "BallGravitySwitch",
+    "BallZigZag",
+    "PortalToNormal",
+    "DoubleSpikeJump",
+    "PortalToShip",
+    "ShipObstacleDive",
+    "PortalToNormal"
+  ]
+}

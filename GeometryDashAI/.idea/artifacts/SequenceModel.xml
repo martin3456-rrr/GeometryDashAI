@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SequenceModel">
+    <output-path>$PROJECT_DIR$/plugins</output-path>
+    <root id="archive" name="SequenceModel.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/com/main/resources/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/target/classes/com.Generator.ILevelGenerationModel" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/target/classes/com/plugins/SequenceModel.class" />
+    </root>
+  </artifact>
+</component>

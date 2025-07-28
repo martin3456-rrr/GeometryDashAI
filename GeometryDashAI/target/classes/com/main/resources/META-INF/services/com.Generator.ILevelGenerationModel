@@ -1,1 +1,6 @@
-com.Generator.RepetitiveModel
+com.plugins.easy.EasyLevelPlugin
+com.plugins.random.RandomPatternPlugin
+com.plugins.progressive.ProgressiveDifficultyPlugin
+com.plugins.thematic.ThematicLevelPlugin
+com.plugins.HardcodedModel
+com.plugins.SequenceModel

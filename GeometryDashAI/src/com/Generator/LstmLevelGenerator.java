@@ -51,16 +51,13 @@ public class LstmLevelGenerator implements ILevelGenerationModel {
     @Override
     public void train(List<Pattern> sequence) {
         initializeMappings();
-        indexToPattern = PatternLibrary.PATTERNS.stream().map(Pattern::getName).distinct().collect(Collectors.toList());
+        indexToPattern = PatternLibrary.PATTERNS.stream()
+                .map(Pattern::getName).distinct().collect(Collectors.toList());
         patternToIndex = IntStream.range(0, indexToPattern.size())
                 .boxed().collect(Collectors.toMap(indexToPattern::get, i -> i));
         int numClasses = indexToPattern.size();
 
-        MultiLayerConfiguration conf = null;
-        network = new MultiLayerNetwork(conf);
-        network.init();
-
-        conf = new NeuralNetConfiguration.Builder()
+        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .weightInit(WeightInit.XAVIER)
                 .updater(new Adam(0.005))
@@ -73,6 +70,7 @@ public class LstmLevelGenerator implements ILevelGenerationModel {
 
         network = new MultiLayerNetwork(conf);
         network.init();
+
         try {
             System.out.println("Zapisywanie wytrenowanego modelu do pliku...");
             File modelFile = new File(MODEL_SAVE_PATH);
