@@ -24,4 +24,7 @@ public class LevelGenerationConfig {
         return forbiddenMechanics != null && forbiddenMechanics.contains(type);
     }
     public double getFunFactorWeight() { return funFactorWeight; }
+    public GenerationModelType getModelType() {
+        return modelType;
+    }
 }

@@ -5,6 +5,7 @@ import com.Component.PlayerState;
 import java.util.*;
 
 import com.jade.Log;
+import com.jade.Window;
 import com.manager.Difficulty;
 import com.manager.PluginLoader;
 
@@ -45,22 +46,33 @@ public class GeneticLevelGenerator {
 
         this.lstmModel = new LstmLevelGenerator();
         System.out.println("Rozpoczynanie wczytywania danych dla LSTM...");
-        List<Pattern> trainingData = TrainingDataAggregator.loadAllLevelsFromDirectory("data/community_levels"); // Użycie TrainingDataAggregator
+        List<Pattern> trainingData = TrainingDataAggregator.loadAllLevelsFromDirectory("data/community_levels");
         if (!trainingData.isEmpty()) {
             this.lstmModel.train(trainingData);
         } else {
             System.err.println("Brak danych treningowych dla LSTM, model nie będzie w pełni funkcjonalny.");
         }
-
         System.out.println("Wczytywanie zewnętrznych modeli generowania (pluginów)...");
         this.pluginModels = PluginLoader.loadPlugins("plugins", ILevelGenerationModel.class);
         if (this.pluginModels.isEmpty()) {
             System.out.println("Nie znaleziono żadnych pluginów.");
+        } else {
+            List<Pattern> baseTraining = PatternLibrary.PATTERNS;
+            List<Pattern> communityLevels = TrainingDataAggregator
+                    .loadAllLevelsFromDirectory("data/community_levels");
+            List<Pattern> fullTraining = new ArrayList<>(baseTraining);
+            fullTraining.addAll(communityLevels);
+            for (ILevelGenerationModel plugin : pluginModels) {
+                try {
+                    plugin.train(fullTraining);
+                } catch (Exception ex) {
+                    System.err.println("Trenowanie pluginu " + plugin.getClass().getName() +
+                            " zakończone błędem: " + ex.getMessage());
+                }
+            }
         }
-
         this.fitnessCalculator = new FitnessCalculator();
     }
-
     private void trainModels() {
         Map<String, List<String>> originalLevels = PatternLibrary.getOriginalLevels();
         for (Map.Entry<String, List<String>> levelEntry : originalLevels.entrySet()) {
@@ -131,10 +143,9 @@ public class GeneticLevelGenerator {
                         (int)((double)currentLength / config.getTargetLength() * 100)
                 );
 
-                Pattern nextPattern = hybridGenerator.getNextPattern(history, context);
+                Pattern nextPattern = pickPattern(history, context, config, currentPlayerState);
 
                 if (nextPattern == null) {
-                    consecutiveFailures++;
                     if (consecutiveFailures > 3) {
                         nextPattern = PatternLibrary.getRandomPattern();
                         consecutiveFailures = 0;
@@ -179,7 +190,58 @@ public class GeneticLevelGenerator {
 
         return simplePatterns.get(new Random().nextInt(simplePatterns.size()));
     }
+    private Pattern pickPattern(List<String> history,
+                                GenerationContext ctx,
+                                LevelGenerationConfig cfg,
+                                PlayerState stateBefore) {
+        Pattern p;
 
+        System.out.println("Używam modelu: " + cfg.getModelType());
+        switch (cfg.getModelType()) {
+            case MARKOV -> {
+                System.out.println("Generuję wzorzec używając Markov Chain");
+                p = generationModels.get(stateBefore).getNextPattern(history);
+            }
+            case LSTM -> {
+                System.out.println("Generuję wzorzec używając LSTM");
+                p = lstmModel.getNextPattern(history);
+            }
+            case PLUGIN -> {
+                System.out.println("Generuję wzorzec używając Plugin");
+
+                Pattern candidate = null;
+                int safety = 0;
+
+                while (candidate == null && safety < pluginModels.size()) {
+                    ILevelGenerationModel plugin =
+                            pluginModels.get(parameterRandom.nextInt(pluginModels.size()));
+
+                    try {
+                        candidate = plugin.getNextPattern(history);
+                    } catch (Exception ex) {
+                        System.err.println("Plugin " + plugin.getClass().getName() +
+                                " spowodował wyjątek i zostaje pominięty: " + ex);
+                        pluginModels.remove(plugin);
+                    }
+                    safety++;
+                }
+                if (candidate == null) {
+                    System.err.println("Brak działających pluginów – wracam do Markova.");
+                    candidate = generationModels.get(stateBefore).getNextPattern(history);
+                }
+                p = candidate;
+            }
+            default -> {
+                System.out.println("Nieznany typ modelu, używam hybrydowego generatora");
+                p = hybridGenerator.getNextPattern(history, ctx);
+            }
+        }
+        while (p != null && p.getDifficulty().ordinal() > cfg.getTargetDifficulty().ordinal()) {
+            System.out.println("Wzorzec " + p.getName() + " za trudny, szukam łatwiejszego");
+            p = PatternLibrary.findEasierAlternativeForState(p, stateBefore);
+        }
+        return p;
+    }
     private boolean isPatternCompatibleWithState(Pattern pattern, PlayerState state) {
         GeneType firstGene = pattern.getGenes().getFirst();
         return switch (state) {
@@ -212,6 +274,9 @@ public class GeneticLevelGenerator {
             if (shouldMutate || Math.random() < this.mutationRate) {
                 PlayerState stateBeforePattern = getPlayerStateBeforePattern(patterns, i);
                 Pattern currentPattern = patterns.get(i);
+                if (currentPattern.getDifficulty().ordinal() > Window.selectedDifficulty.ordinal()) {
+                    shouldMutate = true;
+                }
                 Pattern easierPattern = PatternLibrary.findEasierAlternativeForState(currentPattern, stateBeforePattern);
                 patterns.set(i, easierPattern);
             }
