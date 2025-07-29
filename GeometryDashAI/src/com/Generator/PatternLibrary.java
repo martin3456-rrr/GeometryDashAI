@@ -84,7 +84,39 @@ public class PatternLibrary {
 
         return originalPattern;
     }
+    public static boolean isPatternCompatibleWithState(Pattern pattern, PlayerState state) {
+        if (pattern == null || pattern.getGenes().isEmpty()) return false;
+        GeneType firstGene = pattern.getGenes().getFirst();
 
+        return switch (state) {
+            case FLYING -> firstGene != GeneType.SPIKE_GROUND && firstGene != GeneType.BLOCK_GROUND;
+            case BALL -> true;
+            default -> firstGene != GeneType.SPIKE_AIR;
+        };
+    }
+    public static Pattern findAlternativeOfSameDifficulty(Pattern originalPattern, PlayerState state) {
+        List<Pattern> alternatives = PATTERNS.stream()
+                .filter(p -> p.getDifficulty() == originalPattern.getDifficulty())
+                .filter(p -> !p.getName().equals(originalPattern.getName()))
+                .filter(p -> isPatternCompatibleWithState(p, state))
+                .toList();
+
+        if (!alternatives.isEmpty()) {
+            return alternatives.get(random.nextInt(alternatives.size()));
+        }
+
+        return originalPattern;
+    }
+    public static Pattern getRandomPatternCompatibleWithState(PlayerState state) {
+        List<Pattern> compatiblePatterns = PATTERNS.stream()
+                .filter(p -> isPatternCompatibleWithState(p, state))
+                .toList();
+
+        if (!compatiblePatterns.isEmpty()) {
+            return compatiblePatterns.get(random.nextInt(compatiblePatterns.size()));
+        }
+        return getPatternByName("EmptySpace");
+    }
     public static Map<String, List<String>> getOriginalLevels() {
         return Map.ofEntries(
                 // Poziomy zostały wzbogacone o nowe, bardziej złożone wzorce

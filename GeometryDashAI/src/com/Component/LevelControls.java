@@ -86,7 +86,13 @@ public class LevelControls extends Component {
     }
     public void clearSelectedObjectsAndAdd(Vector2 mousePos)
     {
-        clearSelected();
+        for(GameObject go : selectedObjects)
+        {
+            Bounds bounds = go.getComponent(Bounds.class);
+            if (bounds != null) {
+                bounds.isSelected = false;
+            }
+        }
         addGameObjectToSelect(mousePos);
     }
     public void escapeKeyPressed()

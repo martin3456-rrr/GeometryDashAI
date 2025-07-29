@@ -125,6 +125,6 @@ public class AIPlaytester {
                 }
             }
         }
-        return false;
+        return true;
     }
 }

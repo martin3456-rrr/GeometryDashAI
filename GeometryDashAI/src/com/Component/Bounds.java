@@ -46,7 +46,10 @@ public abstract class Bounds extends Component {
         }
         else if(b.type == BounsType.Triangle)
         {
-            plr.getComponent(Player.class).die();
+            Player playerComponent = plr.getComponent(Player.class);
+            if (playerComponent != null) {
+                playerComponent.die();
+            }
         }
     }
 }

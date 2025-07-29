@@ -65,6 +65,8 @@ public class BoxBounds extends Bounds {
         if (isTrigger) return;
 
         BoxBounds playerBounds = player.getComponent(BoxBounds.class);
+        if (playerBounds == null) return;
+
         playerBounds.calculateCenter();
         this.calculateCenter();
 
@@ -76,6 +78,9 @@ public class BoxBounds extends Bounds {
 
         float overlapX = combinedHalfWidths - Math.abs(dx);
         float overlapY = combinedHalfHeights - Math.abs(dy);
+
+        Player playerComponent = player.getComponent(Player.class);
+        if (playerComponent == null) return;
 
         if (overlapX >= overlapY) {
             if (dy > 0) {

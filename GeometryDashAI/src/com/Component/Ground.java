@@ -14,10 +14,19 @@ public class Ground extends Component {
         if(!Window.getWindow().isInEditor) {
             LevelScene scene = (LevelScene) Window.getWindow().getCurrentScene();
             GameObject player = scene.player;
-            if (player.transform.position.y + player.getComponent(BoxBounds.class).height >
-                    gameObject.transform.position.y) {
-                player.transform.position.y = gameObject.transform.position.y - (float)player.getComponent(BoxBounds.class).height;
-                player.getComponent(Player.class).onGround = true;
+            if(player != null) {
+                BoxBounds playerBounds = player.getComponent(BoxBounds.class);
+                Player playerComponent = player.getComponent(Player.class);
+                if(playerBounds != null) {
+                    if (player.transform.position.y + player.getComponent(BoxBounds.class).height >
+                            gameObject.transform.position.y) {
+                        player.transform.position.y = gameObject.transform.position.y - (float) player.getComponent(BoxBounds.class).height;
+                        if(playerComponent!=null)
+                        {
+                            player.getComponent(Player.class).onGround = true;
+                        }
+                    }
+                }
             }
             gameObject.transform.position.x = scene.camera.position.x - 10;
         }

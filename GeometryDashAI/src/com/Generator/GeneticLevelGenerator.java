@@ -277,8 +277,19 @@ public class GeneticLevelGenerator {
                 if (currentPattern.getDifficulty().ordinal() > Window.selectedDifficulty.ordinal()) {
                     shouldMutate = true;
                 }
-                Pattern easierPattern = PatternLibrary.findEasierAlternativeForState(currentPattern, stateBeforePattern);
-                patterns.set(i, easierPattern);
+                Pattern newPattern = null;
+                double mutationType = Math.random();
+
+                if (mutationType < 0.6) {
+                    newPattern = PatternLibrary.findEasierAlternativeForState(currentPattern, stateBeforePattern);
+                } else if (mutationType < 0.9) {
+                    newPattern = PatternLibrary.findAlternativeOfSameDifficulty(currentPattern, stateBeforePattern);
+                } else {
+                    newPattern = PatternLibrary.getRandomPatternCompatibleWithState(stateBeforePattern);
+                }
+                if (newPattern != null) {
+                    patterns.set(i, newPattern);
+                }
             }
         }
     }
