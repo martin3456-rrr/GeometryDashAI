@@ -1,6 +1,6 @@
 # Geometry Dash AI - Java Implementation
 
-An advanced Java implementation of Geometry Dash, featuring a powerful physics engine, a level editor, and an AI system using a genetic algorithm to procedurally generate unique and playable maps.
+An advanced Java implementation of Geometry Dash, featuring a powerful physics engine, and an AI system using a genetic algorithm to procedurally generate unique and playable maps.
 
 ## ✨ Features
 - **Extensive Game Engine** Precise physics and a component-based collision system (BoxBounds, TriangleBounds).
