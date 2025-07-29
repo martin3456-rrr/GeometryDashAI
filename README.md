@@ -27,11 +27,11 @@ The game features an advanced level generation system based on a genetic algorit
 
 ## 🚀 Starting
 1. Clone the repository
-2. Open the project in the IDE (IntelliJ IDEA/Eclipse
+2. Open the project in the IDE (IntelliJ IDEA/Eclipse)
 3. Make sure the dependencies (including the deeplearning4j libraries) are configured correctly.
 4. Run the `Main.java` class 
 5. Select "Start Game" from the main menu
-6.(Optional) Place your own generation models as .jar files in the plugins directory in the project's root folder to dynamically load them.
+6. (Optional) Place your own generation models as .jar files in the plugins directory in the project's root folder to dynamically load them.
 
 ## 🛠️ Requirements
 - Java 24+
