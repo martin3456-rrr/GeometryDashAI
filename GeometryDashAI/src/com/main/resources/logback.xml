@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.nd4j" level="OFF"/>
+    <logger name="org.deeplearning4j" level="OFF"/>
+    <logger name="org.nd4j.linalg.factory.Nd4jBackend" level="OFF"/>
+    <logger name="org.nd4j.nativeblas.NativeOpsHolder" level="OFF"/>
+    <logger name="org.nd4j.linalg.cpu.nativecpu.CpuNDArrayFactory" level="OFF"/>
+    <logger name="org.nd4j.nativeblas.Nd4jBlas" level="OFF"/>
+    <logger name="org.nd4j.linalg.api.ops.executioner.DefaultOpExecutioner" level="OFF"/>
+    <logger name="org.nd4j.linalg.cpu.nativecpu.CpuBackend" level="OFF"/>
+    <logger name="org.deeplearning4j.nn.multilayer.MultiLayerNetwork" level="OFF"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
